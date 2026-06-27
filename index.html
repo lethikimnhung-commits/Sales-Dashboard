@@ -3,262 +3,338 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales Dashboard — Jun 2026</title>
+<title>Company Sales Dashboard</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #f5f6fa;
-    color: #1a1a2e;
-    font-size: 13px;
-    padding: 16px;
-    max-width: 1200px;
-    margin: 0 auto;
+  :root{
+    --bg:#f4f5f7; --card:#fff; --ink:#1e2330; --muted:#8a90a2; --line:#edeef2;
+    --accent:#4f46e5; --accent-soft:#eef0fe;
+    --green:#16a34a; --amber:#d97706; --red:#dc2626;
   }
-  h2.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .header h1 { font-size: 18px; font-weight: 700; color: #1a1a2e; }
-  .header .subtitle { font-size: 12px; color: #888; margin-top: 2px; }
-  .badge { background: #e8f5e9; color: #2e7d32; border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:13px;padding:18px 22px;max-width:1280px;margin:0 auto}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  h1{font-size:19px;font-weight:700;letter-spacing:-.3px}
+  .sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-  .kpi-row {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
-  }
-  .kpi-card {
-    background: #fff;
-    border-radius: 10px; padding: 14px 16px;
-    border-left: 4px solid transparent;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .kpi-card.blue { border-color: #2196f3; }
-  .kpi-card.green { border-color: #4caf50; }
-  .kpi-card.orange { border-color: #ff9800; }
-  .kpi-card.red { border-color: #f44336; }
-  .kpi-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-  .kpi-value { font-size: 22px; font-weight: 700; }
-  .kpi-sub { font-size: 11px; color: #aaa; margin-top: 3px; }
-  .kpi-card.blue .kpi-value { color: #1565c0; }
-  .kpi-card.green .kpi-value { color: #2e7d32; }
-  .kpi-card.orange .kpi-value { color: #e65100; }
-  .kpi-card.red .kpi-value { color: #c62828; }
+  /* header + filters */
+  .top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  .filters{display:flex;gap:10px;flex-wrap:wrap}
+  .fld{display:flex;flex-direction:column;gap:3px}
+  .fld label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
+  .fld select{appearance:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 26px 6px 10px;font-size:12px;color:var(--ink);cursor:pointer;min-width:118px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 3l3 3 3-3' stroke='%238a90a2' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 9px center}
+  .fld select:focus{outline:none;border-color:var(--accent)}
+  .reset{align-self:flex-end;background:var(--accent-soft);color:var(--accent);border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer}
 
-  .charts-row {
-    display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;
-  }
-  .charts-row2 {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;
-  }
-  .chart-card {
-    background: #fff;
-    border-radius: 10px; padding: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .chart-title {
-    font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #1a1a2e;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .chart-title .icon { font-size: 15px; }
-  canvas { display: block; }
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+  .kpi{background:var(--card);border-radius:12px;padding:13px 15px}
+  .kpi .lab{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:5px}
+  .kpi .val{font-size:21px;font-weight:700;letter-spacing:-.5px}
+  .kpi .dlt{font-size:11px;margin-top:3px;color:var(--muted)}
 
-  .aging-bar { margin-bottom: 10px; }
-  .aging-label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
-  .aging-track { background: #eee; border-radius: 4px; height: 10px; overflow: hidden; }
-  .aging-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  /* insights */
+  .insights{background:var(--card);border-radius:12px;padding:13px 16px;margin-bottom:14px}
+  .insights .h{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px}
+  .ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 28px}
+  .ins-grid div{font-size:12px;color:#414861}
+  .ins-grid b{color:var(--ink)}
 
-  .brand-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
-  .brand-name { width: 100px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
-  .brand-bar-track { flex: 1; background: #eee; border-radius: 3px; height: 8px; overflow: hidden; }
-  .brand-bar-fill { height: 100%; border-radius: 3px; background: #2196f3; }
-  .brand-val { font-size: 11px; color: #666; width: 55px; text-align: right; flex-shrink: 0; }
+  /* charts */
+  .grid{display:grid;gap:12px;margin-bottom:12px}
+  .g-3{grid-template-columns:1.6fr 1fr 1fr}
+  .g-2{grid-template-columns:1fr 1fr}
+  .card{background:var(--card);border-radius:12px;padding:15px}
+  .card h3{font-size:12.5px;font-weight:600;margin-bottom:11px;display:flex;align-items:center;gap:6px}
+  canvas{display:block}
 
-  .tab-group { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-  .tab { padding: 4px 12px; border-radius: 14px; font-size: 11px; cursor: pointer; border: none; background: #eee; color: #666; font-weight: 500; }
-  .tab.active { background: #2196f3; color: #fff; }
-  footer { text-align: center; color: #aaa; font-size: 11px; margin-top: 16px; }
+  /* brand bars */
+  .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .bar-name{width:92px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;color:#414861}
+  .bar-track{flex:1;background:var(--line);border-radius:3px;height:7px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:3px;background:var(--accent)}
+  .bar-val{width:52px;text-align:right;font-size:11px;color:var(--muted);flex-shrink:0}
 
-  @media (max-width: 768px) {
-    .kpi-row { grid-template-columns: repeat(2, 1fr); }
-    .charts-row, .charts-row2 { grid-template-columns: 1fr; }
-    #brandsContainer { grid-template-columns: 1fr !important; }
+  /* AR section */
+  .ar{background:var(--card);border-radius:12px;padding:15px 16px;margin-bottom:12px}
+  .ar h3{font-size:12.5px;font-weight:600;margin-bottom:3px}
+  .ar .u{font-size:11px;color:var(--muted);margin-bottom:11px}
+  .ar-cols{display:grid;grid-template-columns:1fr 1.4fr;gap:22px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:600;padding:5px 6px;border-bottom:1px solid var(--line)}
+  td{padding:6px 6px;border-bottom:1px solid var(--line)}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.total td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
+  .note{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.4}
+  .wk{display:flex;gap:10px}
+  .wk .box{flex:1;border:1px solid var(--line);border-radius:9px;padding:10px}
+  .wk .box .t{font-size:11px;color:var(--muted);margin-bottom:4px}
+  .wk .box .a{font-size:18px;font-weight:700}
+  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:14px}
+
+  @media(max-width:860px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .g-3,.g-2{grid-template-columns:1fr}
+    .ins-grid,.ar-cols{grid-template-columns:1fr}
   }
 </style>
 </head>
 <body>
-<h2 class="sr-only">Sales Dashboard tháng 6/2026 - Tổng hợp doanh số, công nợ và thương hiệu</h2>
+<h2 class="sr-only">Company Sales Dashboard — bộ lọc động cập nhật toàn bộ biểu đồ</h2>
 
-<div class="header">
+<div class="top">
   <div>
-    <h1>Sales Dashboard</h1>
-    <div class="subtitle">Cập nhật đến tháng 6/2026 · Đơn vị: Tỷ VNĐ</div>
+    <h1>Company Sales Dashboard</h1>
+    <div class="sub">Tổng quan doanh thu toàn công ty — bộ lọc cập nhật mọi biểu đồ · Đơn vị: tỷ ₫</div>
   </div>
-  <span class="badge">YTD Jan–Jun 2026</span>
-</div>
-
-<div class="kpi-row">
-  <div class="kpi-card blue">
-    <div class="kpi-label">Tổng doanh số YTD</div>
-    <div class="kpi-value">109.3 B</div>
-    <div class="kpi-sub">vs 206.2B cả năm 2025</div>
-  </div>
-  <div class="kpi-card green">
-    <div class="kpi-label">Doanh số tháng 6</div>
-    <div class="kpi-value">23.3 B</div>
-    <div class="kpi-sub">↑ Cao nhất trong năm</div>
-  </div>
-  <div class="kpi-card orange">
-    <div class="kpi-label">Tổng công nợ AR</div>
-    <div class="kpi-value">25.4 B</div>
-    <div class="kpi-sub">174 khách hàng</div>
-  </div>
-  <div class="kpi-card red">
-    <div class="kpi-label">AR Quá hạn &gt;180 ngày</div>
-    <div class="kpi-value">2.7 B</div>
-    <div class="kpi-sub">20 KH high risk</div>
+  <div class="filters">
+    <div class="fld"><label>Year</label><select id="fYear"></select></div>
+    <div class="fld"><label>Team</label><select id="fTeam"></select></div>
+    <div class="fld"><label>Category</label><select id="fCat"></select></div>
+    <div class="fld"><label>Customer type</label><select id="fCtype"></select></div>
+    <div class="fld"><label>Brand</label><select id="fBrand"></select></div>
+    <button class="reset" id="reset">Reset</button>
   </div>
 </div>
 
-<div class="charts-row">
-  <div class="chart-card">
-    <div class="chart-title"><span class="icon">📈</span> Doanh số theo tháng 2026</div>
-    <canvas id="monthlyChart" height="180"></canvas>
-  </div>
-  <div class="chart-card">
-    <div class="chart-title"><span class="icon">🏢</span> Theo Team (YTD)</div>
-    <canvas id="teamChart" height="180"></canvas>
-  </div>
+<div class="kpis" id="kpis"></div>
+
+<div class="insights">
+  <div class="h">💡 Quick insights for leadership — tự động cập nhật theo bộ lọc</div>
+  <div class="ins-grid" id="insights"></div>
 </div>
 
-<div class="charts-row2">
-  <div class="chart-card">
-    <div class="chart-title"><span class="icon">📊</span> Doanh số theo năm (Team chính)</div>
-    <div class="tab-group">
-      <button class="tab active" onclick="showYoY('qsr', event)">QSR/KA</button>
-      <button class="tab" onclick="showYoY('han', event)">HAN</button>
-      <button class="tab" onclick="showYoY('gelato', event)">Gelato</button>
-      <button class="tab" onclick="showYoY('coffee', event)">Coffee</button>
-    </div>
-    <canvas id="yoyChart" height="155"></canvas>
-  </div>
+<div class="grid g-3">
+  <div class="card"><h3>📈 Doanh thu theo tháng</h3><canvas id="cMonth" height="170"></canvas></div>
+  <div class="card"><h3>🏢 Theo Team</h3><canvas id="cTeam" height="170"></canvas></div>
+  <div class="card"><h3>🧩 Theo Category</h3><canvas id="cCat" height="170"></canvas></div>
+</div>
 
-  <div class="chart-card">
-    <div class="chart-title"><span class="icon">💰</span> AR Aging Breakdown</div>
-    <canvas id="arChart" height="120"></canvas>
-    <div style="margin-top:12px;">
-      <div class="aging-bar">
-        <div class="aging-label"><span>0–30 ngày (đến hạn)</span><span style="color:#4caf50;font-weight:600;">3,430 M</span></div>
-        <div class="aging-track"><div class="aging-fill" style="width:13.5%;background:#4caf50;"></div></div>
-      </div>
-      <div class="aging-bar">
-        <div class="aging-label"><span>30–90 ngày</span><span style="color:#ff9800;font-weight:600;">1,102 M</span></div>
-        <div class="aging-track"><div class="aging-fill" style="width:4.3%;background:#ff9800;"></div></div>
-      </div>
-      <div class="aging-bar">
-        <div class="aging-label"><span>90–180 ngày</span><span style="color:#f44336;font-weight:600;">740 M</span></div>
-        <div class="aging-track"><div class="aging-fill" style="width:2.9%;background:#f44336;"></div></div>
-      </div>
-      <div class="aging-bar">
-        <div class="aging-label"><span>&gt;180 ngày (nguy hiểm)</span><span style="color:#b71c1c;font-weight:700;">2,712 M</span></div>
-        <div class="aging-track"><div class="aging-fill" style="width:10.7%;background:#b71c1c;"></div></div>
+<div class="grid g-2">
+  <div class="card"><h3>📊 Xu hướng theo năm <span style="font-weight:400;color:var(--muted);font-size:11px">(bỏ qua lọc Year)</span></h3><canvas id="cYear" height="150"></canvas></div>
+  <div class="card"><h3>🏷️ Top 10 thương hiệu</h3><div id="brands"></div></div>
+</div>
+
+<div class="ar">
+  <h3>💰 AR Collection & New Contract Deposits</h3>
+  <div class="u">Đơn vị: tỷ ₫ · nguồn: sheet AR Weekly (nhãn tĩnh)</div>
+  <div class="ar-cols">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px">① WEEKLY AR COLLECTION</div>
+      <div class="wk">
+        <div class="box"><div class="t">✅ Tuần trước · 22–27/06 (đã thu)</div><div class="a" style="color:var(--green)">5.5 bn</div></div>
+        <div class="box"><div class="t">🎯 Tuần tới · 29/06–04/07 (dự kiến)</div><div class="a" style="color:var(--accent)">4.5 bn</div></div>
       </div>
     </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px">② NEW CONTRACT DEPOSITS — BY CUSTOMER</div>
+      <table>
+        <thead><tr><th>Khách hàng / Hợp đồng</th><th class="num">Đặt cọc</th><th>Dự kiến</th></tr></thead>
+        <tbody>
+          <tr><td>Jollibee (hợp đồng mới)</td><td class="num">8.6 bn</td><td>Cuối tháng 6</td></tr>
+          <tr><td>Lotteria (8 máy kem)</td><td class="num">0.9 bn</td><td>Đầu T7</td></tr>
+          <tr><td>Texas Chicken (giai đoạn 2)</td><td class="num">1.0 bn</td><td>Ước tính T7</td></tr>
+          <tr><td>Vlotus</td><td class="num">1.4 bn</td><td>26-06-26</td></tr>
+          <tr><td>TPC (giai đoạn 2)</td><td class="num">1.3 bn</td><td>Đầu T7</td></tr>
+          <tr><td>Shake Shack (giai đoạn 2)</td><td class="num">0.7 bn</td><td>Đầu T7</td></tr>
+          <tr><td>Lotteria (5 máy còn lại, 20%)</td><td class="num">0.3 bn</td><td>30-07-26</td></tr>
+          <tr class="total"><td>TỔNG ĐẶT CỌC</td><td class="num">14.2 bn</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+  <div class="note">Ghi chú: số tiền & ngày đặt cọc liên kết từ AR Weekly (khối New Contract & deposit). Tên khách hàng là nhãn tĩnh.</div>
 </div>
 
-<div class="chart-card">
-  <div class="chart-title"><span class="icon">🏷️</span> Top Thương Hiệu 2026 (YTD)</div>
-  <div id="brandsContainer" style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;"></div>
-</div>
-
-<footer>Nguồn: Sales Update Jun 2026.xlsb · Dashboard tạo tự động</footer>
+<footer>Nguồn: Sales Update Jun 2026.xlsb · 136.842 dòng giao dịch được tổng hợp · Dashboard tương tác</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="data.js"></script>
 <script>
-const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
-const monthlyData = [21.01, 14.64, 13.93, 18.00, 18.38, 23.35];
-new Chart(monthlyCtx, {
-  type: 'bar',
-  data: {
-    labels: ['T1','T2','T3','T4','T5','T6'],
-    datasets: [{ label: 'Doanh số (Tỷ VND)', data: monthlyData,
-      backgroundColor: monthlyData.map((v,i) => i===5 ? '#1565c0' : '#90caf9'), borderRadius: 5 }]
-  },
-  options: { responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toFixed(2)+' B VND' }}},
-    scales: { y: { grid: { color: '#f0f0f0' }, ticks: { callback: v => v+'B', font: { size: 11 }}},
-      x: { grid: { display: false }, ticks: { font: { size: 11 }}}}}
-});
+const C = window.CUBE;
+const ACCENT='#4f46e5';
+const PALETTE=['#4f46e5','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316'];
+const MN=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
 
-const teamCtx = document.getElementById('teamChart').getContext('2d');
-new Chart(teamCtx, {
-  type: 'doughnut',
-  data: {
-    labels: ['QSR/KA','HAN','HCM Coffee','HCM Gelato','SERVICE','HCM Hot Kitchen','DAN'],
-    datasets: [{ data: [60.70, 15.38, 9.55, 8.16, 8.30, 2.45, 4.74],
-      backgroundColor: ['#1565c0','#1976d2','#42a5f5','#90caf9','#4caf50','#ff9800','#f44336'],
-      borderWidth: 2, borderColor: '#fff' }]
-  },
-  options: { responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'right', labels: { font: { size: 10 }, boxWidth: 12, padding: 6 }},
-      tooltip: { callbacks: { label: c => c.label+': '+c.parsed.toFixed(2)+' B ('+((c.parsed/109.3)*100).toFixed(1)+'%)' }}}}
-});
+// row indices: [year,month,team,brand,cat,ctype,rev,qty,profit]
+const R={Y:0,M:1,T:2,B:3,C:4,CT:5,REV:6,QTY:7,PRF:8};
 
-const yoyCtx = document.getElementById('yoyChart').getContext('2d');
-const yoyDatasets = {
-  qsr:    { label:'HCM QSR/KA', data:[69.54,132.50,118.23,118.05,60.70], color:'#1565c0' },
-  han:    { label:'HAN',         data:[17.35, 12.48, 18.66, 30.48, 15.38], color:'#43a047' },
-  gelato: { label:'HCM Gelato',  data:[8.31,  11.48, 12.06, 13.26,  8.16], color:'#fb8c00' },
-  coffee: { label:'HCM Coffee',  data:[19.91, 12.64, 13.87, 15.93,  9.55], color:'#8e24aa' }
-};
-let yoyChart = new Chart(yoyCtx, {
-  type: 'line',
-  data: { labels: ['2022','2023','2024','2025','2026*'],
-    datasets: [{ ...yoyDatasets.qsr, borderColor: yoyDatasets.qsr.color, backgroundColor: yoyDatasets.qsr.color+'22',
-      tension: 0.3, fill: true, pointRadius: 4, borderWidth: 2 }]},
-  options: { responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toFixed(2)+' B VND' }}},
-    scales: { y: { grid: { color: '#f0f0f0' }, ticks: { callback: v => v+'B', font: { size: 10 }}},
-      x: { grid: { display: false }, ticks: { font: { size: 11 }}}}}
-});
-function showYoY(key, ev) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  ev.target.classList.add('active');
-  const d = yoyDatasets[key];
-  yoyChart.data.datasets[0].data = d.data;
-  yoyChart.data.datasets[0].label = d.label;
-  yoyChart.data.datasets[0].borderColor = d.color;
-  yoyChart.data.datasets[0].backgroundColor = d.color+'22';
-  yoyChart.update();
+const fmtBn = v => (v/1e9).toFixed(1);
+const fmtBnFull = v => (v/1e9).toFixed(2)+' bn';
+const fmtInt = v => Math.round(v).toLocaleString('en-US');
+
+// ---- build filter dropdowns ----
+function fill(sel, items, allLabel, def){
+  const s=document.getElementById(sel);
+  s.innerHTML='';
+  const o0=document.createElement('option');o0.value='__ALL__';o0.textContent=allLabel;s.appendChild(o0);
+  items.forEach((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=it;s.appendChild(o);});
+  if(def!==undefined) s.value=def;
+}
+function fillYears(){
+  const s=document.getElementById('fYear');s.innerHTML='';
+  const o0=document.createElement('option');o0.value='__ALL__';o0.textContent='(All years)';s.appendChild(o0);
+  C.years.forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;s.appendChild(o);});
+  s.value=String(C.years[C.years.length-1]); // default latest year
+}
+fillYears();
+fill('fTeam',C.teams,'(All teams)');
+fill('fCat',C.cats,'(All categories)');
+fill('fCtype',C.ctypes,'(All cust. types)');
+// brands sorted by total rev desc for usability
+const brandTot=C.brands.map((b,i)=>({i,t:0}));
+C.rows.forEach(r=>brandTot[r[R.B]].t+=r[R.REV]);
+brandTot.sort((a,b)=>b.t-a.t);
+(function(){const s=document.getElementById('fBrand');s.innerHTML='';
+  const o0=document.createElement('option');o0.value='__ALL__';o0.textContent='(All brands)';s.appendChild(o0);
+  brandTot.forEach(o=>{const op=document.createElement('option');op.value=o.i;op.textContent=C.brands[o.i];s.appendChild(op);});})();
+
+// ---- current filter state ----
+function F(){
+  const yv=document.getElementById('fYear').value;
+  return {
+    year: yv==='__ALL__'?null:parseInt(yv),
+    team: val('fTeam'), cat: val('fCat'), ctype: val('fCtype'), brand: val('fBrand')
+  };
+}
+function val(id){const v=document.getElementById(id).value;return v==='__ALL__'?null:parseInt(v);}
+
+function match(r,f,ignoreYear){
+  if(!ignoreYear && f.year!==null && r[R.Y]!==f.year) return false;
+  if(f.team!==null && r[R.T]!==f.team) return false;
+  if(f.cat!==null && r[R.C]!==f.cat) return false;
+  if(f.ctype!==null && r[R.CT]!==f.ctype) return false;
+  if(f.brand!==null && r[R.B]!==f.brand) return false;
+  return true;
 }
 
-const arCtx = document.getElementById('arChart').getContext('2d');
-new Chart(arCtx, {
-  type: 'doughnut',
-  data: { labels: ['0–30 ngày','30–90 ngày','90–180 ngày','>180 ngày','Chưa đến hạn'],
-    datasets: [{ data: [3430, 1102, 740, 2712, 17451],
-      backgroundColor: ['#4caf50','#ff9800','#f44336','#b71c1c','#e0e0e0'], borderWidth: 2, borderColor: '#fff' }]},
-  options: { responsive: true, maintainAspectRatio: false, cutout: '65%',
-    plugins: { legend: { display: false },
-      tooltip: { callbacks: { label: c => c.label+': '+c.parsed.toFixed(0)+' M VND' }}}}
-});
+// chart instances
+let chMonth,chTeam,chCat,chYear;
 
-const brands = [
-  ['Hoshizaki',18.88],['Toastmaster',11.39],['Davinci',10.28],['Blendtec',9.28],
-  ['Bunn',7.86],['Bezzera',5.41],['Carpigiani',5.55],['Oatside',4.32],
-  ['Nissei',3.24],['Service',4.60]
-];
-const maxB = Math.max(...brands.map(b=>b[1]));
-const cont = document.getElementById('brandsContainer');
-brands.forEach(([name, val]) => {
-  const div = document.createElement('div');
-  div.className = 'brand-row';
-  div.innerHTML = `<span class="brand-name" title="${name}">${name}</span>
-    <div class="brand-bar-track"><div class="brand-bar-fill" style="width:${(val/maxB*100).toFixed(1)}%"></div></div>
-    <span class="brand-val">${val.toFixed(1)} B</span>`;
-  cont.appendChild(div);
+function render(){
+  const f=F();
+  const rows=C.rows.filter(r=>match(r,f,false));
+
+  // KPIs
+  let rev=0,qty=0,prf=0;
+  rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];prf+=r[R.PRF];});
+  const margin = rev? (prf/rev*100):0;
+  const avgPrice = qty? rev/qty:0;
+  document.getElementById('kpis').innerHTML=[
+    ['Total revenue (₫)', fmtBn(rev)+' bn', rows.length.toLocaleString()+' dòng'],
+    ['Total quantity', fmtInt(qty), 'số lượng bán'],
+    ['Gross profit (₫)', fmtBn(prf)+' bn', ''],
+    ['Profit margin', margin.toFixed(1)+'%', ''],
+    ['Avg price / unit (₫)', fmtInt(avgPrice), '']
+  ].map(k=>`<div class="kpi"><div class="lab">${k[0]}</div><div class="val">${k[1]}</div><div class="dlt">${k[2]}</div></div>`).join('');
+
+  // by month (selected year, or all years summed)
+  const mAgg=new Array(12).fill(0);
+  rows.forEach(r=>{if(r[R.M]>=1&&r[R.M]<=12)mAgg[r[R.M]-1]+=r[R.REV];});
+  drawMonth(mAgg);
+
+  // by team
+  const tAgg={};
+  rows.forEach(r=>{tAgg[r[R.T]]=(tAgg[r[R.T]]||0)+r[R.REV];});
+  drawTeam(tAgg);
+
+  // by category
+  const cAgg={};
+  rows.forEach(r=>{cAgg[r[R.C]]=(cAgg[r[R.C]]||0)+r[R.REV];});
+  drawCat(cAgg);
+
+  // by brand top10
+  const bAgg={};
+  rows.forEach(r=>{bAgg[r[R.B]]=(bAgg[r[R.B]]||0)+r[R.REV];});
+  drawBrands(bAgg);
+
+  // by year (ignore year filter)
+  const yRows=C.rows.filter(r=>match(r,f,true));
+  const yAgg={};
+  yRows.forEach(r=>{yAgg[r[R.Y]]=(yAgg[r[R.Y]]||0)+r[R.REV];});
+  drawYear(yAgg);
+
+  // insights
+  drawInsights(rows,rev,prf,margin,tAgg,bAgg,cAgg,yAgg,f);
+}
+
+function drawMonth(m){
+  const data={labels:MN,datasets:[{data:m.map(v=>+(v/1e9).toFixed(2)),backgroundColor:m.map((v,i)=>i===maxIdx(m)?ACCENT:'#c7cafc'),borderRadius:5}]};
+  if(chMonth){chMonth.data=data;chMonth.update();return;}
+  chMonth=new Chart(cMonth,{type:'bar',data,options:baseBar()});
+}
+function drawTeam(agg){
+  const ent=Object.entries(agg).sort((a,b)=>b[1]-a[1]);
+  const data={labels:ent.map(e=>C.teams[e[0]]),datasets:[{data:ent.map(e=>+(e[1]/1e9).toFixed(2)),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]};
+  if(chTeam){chTeam.data=data;chTeam.update();return;}
+  chTeam=new Chart(cTeam,{type:'doughnut',data,options:baseDonut()});
+}
+function drawCat(agg){
+  const ent=Object.entries(agg).sort((a,b)=>b[1]-a[1]);
+  const data={labels:ent.map(e=>C.cats[e[0]]),datasets:[{data:ent.map(e=>+(e[1]/1e9).toFixed(2)),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]};
+  if(chCat){chCat.data=data;chCat.update();return;}
+  chCat=new Chart(cCat,{type:'doughnut',data,options:baseDonut()});
+}
+function drawYear(agg){
+  const ys=Object.keys(agg).map(Number).sort();
+  const data={labels:ys.map(String),datasets:[{data:ys.map(y=>+(agg[y]/1e9).toFixed(2)),borderColor:ACCENT,backgroundColor:'#4f46e522',fill:true,tension:.3,pointRadius:3,borderWidth:2}]};
+  if(chYear){chYear.data=data;chYear.update();return;}
+  chYear=new Chart(cYear,{type:'line',data,options:baseBar()});
+}
+function drawBrands(agg){
+  const ent=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const max=ent.length?ent[0][1]:1;
+  document.getElementById('brands').innerHTML=ent.map(e=>{
+    const name=C.brands[e[0]],v=e[1];
+    return `<div class="bar-row"><span class="bar-name" title="${name}">${name}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%"></div></div>
+      <span class="bar-val">${fmtBn(v)} bn</span></div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:12px">Không có dữ liệu</div>';
+}
+
+function drawInsights(rows,rev,prf,margin,tAgg,bAgg,cAgg,yAgg,f){
+  const topTeam=Object.entries(tAgg).sort((a,b)=>b[1]-a[1])[0];
+  const topBrand=Object.entries(bAgg).sort((a,b)=>b[1]-a[1])[0];
+  const topCat=Object.entries(cAgg).sort((a,b)=>b[1]-a[1])[0];
+  // peak month
+  const mAgg=new Array(12).fill(0);rows.forEach(r=>{if(r[R.M]>=1)mAgg[r[R.M]-1]+=r[R.REV];});
+  const pk=maxIdx(mAgg); const lo=minIdxNonZero(mAgg);
+  // YoY: compare selected year vs prev year on same months present (only if a year selected)
+  let yoy='—';
+  if(f.year!==null){
+    const cur=yAggForYear(f,f.year), prev=yAggForYear(f,f.year-1);
+    if(prev>0){const g=((cur-prev)/prev*100);yoy=(g>=0?'▲ +':'▼ ')+g.toFixed(1)+'%  —  '+fmtBn(cur)+' bn vs '+fmtBn(prev)+' bn';}
+  }
+  const tot=rev||1;
+  const I=[
+    f.year!==null?`▲ YoY growth: <b>${yoy}</b>`:`📅 Đang xem: <b>tất cả các năm</b>`,
+    topTeam?`🏢 Top team: <b>${C.teams[topTeam[0]]}</b> — ${fmtBn(topTeam[1])} bn (${(topTeam[1]/tot*100).toFixed(0)}%)`:'',
+    topBrand?`🏷️ Top brand: <b>${C.brands[topBrand[0]]}</b> — ${fmtBn(topBrand[1])} bn (${(topBrand[1]/tot*100).toFixed(0)}%)`:'',
+    topCat?`🧩 Top category: <b>${C.cats[topCat[0]]}</b> — ${fmtBn(topCat[1])} bn`:'',
+    mAgg.some(v=>v>0)?`📅 Peak: <b>${MN[pk]} (${fmtBn(mAgg[pk])} bn)</b> · thấp nhất ${MN[lo]} (${fmtBn(mAgg[lo])} bn)`:'',
+    `💰 Gross margin: <b>${margin.toFixed(1)}%</b> · profit ${fmtBn(prf)} bn`
+  ].filter(Boolean);
+  document.getElementById('insights').innerHTML=I.map(x=>`<div>${x}</div>`).join('');
+}
+function yAggForYear(f,year){let s=0;C.rows.forEach(r=>{if(r[R.Y]===year&&match(r,f,true))s+=r[R.REV];});return s;}
+
+function maxIdx(a){let m=0;for(let i=1;i<a.length;i++)if(a[i]>a[m])m=i;return m;}
+function minIdxNonZero(a){let m=-1;for(let i=0;i<a.length;i++){if(a[i]>0&&(m<0||a[i]<a[m]))m=i;}return m<0?0:m;}
+
+function baseBar(){return{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' bn ₫'}}},
+  scales:{y:{grid:{color:'#f0f0f3'},ticks:{callback:v=>v+'b',font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}};}
+function baseDonut(){return{responsive:true,maintainAspectRatio:false,cutout:'60%',
+  plugins:{legend:{position:'right',labels:{font:{size:9.5},boxWidth:11,padding:5}},
+  tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(2)+' bn'}}}};}
+
+['fYear','fTeam','fCat','fCtype','fBrand'].forEach(id=>document.getElementById(id).addEventListener('change',render));
+document.getElementById('reset').addEventListener('click',()=>{
+  document.getElementById('fYear').value=String(C.years[C.years.length-1]);
+  ['fTeam','fCat','fCtype','fBrand'].forEach(id=>document.getElementById(id).value='__ALL__');
+  render();
 });
+render();
 </script>
 </body>
 </html>
