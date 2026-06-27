@@ -6,334 +6,293 @@
 <title>Company Sales Dashboard</title>
 <style>
   :root{
-    --bg:#f4f5f7; --card:#fff; --ink:#1e2330; --muted:#8a90a2; --line:#edeef2;
-    --accent:#4f46e5; --accent-soft:#eef0fe;
-    --green:#16a34a; --amber:#d97706; --red:#dc2626;
+    --navy:#1f3864; --navy2:#2e5496; --blue:#4472c4; --teal:#2f7d8c;
+    --bg:#eef1f5; --card:#fff; --ink:#21304a; --muted:#7c8595; --line:#e3e7ee;
+    --insbg:#eaf1f8;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:13px;padding:18px 22px;max-width:1280px;margin:0 auto}
+  body{font-family:'Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:12px;padding:12px 16px;max-width:1340px;margin:0 auto}
   .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-  h1{font-size:19px;font-weight:700;letter-spacing:-.3px}
-  .sub{font-size:12px;color:var(--muted);margin-top:2px}
 
-  /* header + filters */
-  .top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
-  .filters{display:flex;gap:10px;flex-wrap:wrap}
-  .fld{display:flex;flex-direction:column;gap:3px}
-  .fld label{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
-  .fld select{appearance:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 26px 6px 10px;font-size:12px;color:var(--ink);cursor:pointer;min-width:118px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 3l3 3 3-3' stroke='%238a90a2' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 9px center}
-  .fld select:focus{outline:none;border-color:var(--accent)}
-  .reset{align-self:flex-end;background:var(--accent-soft);color:var(--accent);border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer}
+  /* header */
+  .head{background:var(--navy);color:#fff;border-radius:6px 6px 0 0;padding:9px 14px}
+  .head h1{font-size:16px;font-weight:700;letter-spacing:.2px}
+  .head .sub{font-size:11px;font-style:italic;color:#b9c6dc;margin-top:1px}
 
-  /* KPI */
-  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
-  .kpi{background:var(--card);border-radius:12px;padding:13px 15px}
-  .kpi .lab{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:5px}
-  .kpi .val{font-size:21px;font-weight:700;letter-spacing:-.5px}
-  .kpi .dlt{font-size:11px;margin-top:3px;color:var(--muted)}
+  /* filters */
+  .filters{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:8px;background:#dfe5ee;padding:8px 14px;align-items:end}
+  .fld label{display:block;background:var(--navy2);color:#fff;font-size:10px;font-weight:600;text-align:center;padding:3px;border-radius:3px 3px 0 0;letter-spacing:.4px}
+  .fld select{width:100%;border:1px solid #c3ccdb;border-top:none;border-radius:0 0 3px 3px;padding:5px 8px;font-size:11.5px;background:#fff;color:var(--ink);cursor:pointer;font-weight:600}
+  .fld select:focus{outline:none;border-color:var(--navy2)}
+  .reset{background:var(--teal);color:#fff;border:none;border-radius:4px;padding:7px 12px;font-size:11px;font-weight:600;cursor:pointer;height:fit-content}
+
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}
+  .kpi{border-radius:6px;padding:10px 12px;color:#fff;text-align:center}
+  .kpi:nth-child(1){background:var(--navy)} .kpi:nth-child(2){background:var(--navy2)}
+  .kpi:nth-child(3){background:var(--teal)} .kpi:nth-child(4){background:var(--navy2)}
+  .kpi:nth-child(5){background:var(--navy)}
+  .kpi .val{font-size:20px;font-weight:700;line-height:1.1}
+  .kpi .lab{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:#cdd8ea;margin-top:3px}
+
+  /* section bar */
+  .sec{background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:5px;letter-spacing:.3px;margin:10px 0 8px;display:flex;align-items:center;gap:7px}
 
   /* insights */
-  .insights{background:var(--card);border-radius:12px;padding:13px 16px;margin-bottom:14px}
-  .insights .h{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px}
-  .ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 28px}
-  .ins-grid div{font-size:12px;color:#414861}
-  .ins-grid b{color:var(--ink)}
+  .insights{background:var(--insbg);border:1px solid #d4e0ee;border-radius:6px;padding:9px 13px}
+  .insights .h{font-size:10.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+  .ins-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 26px}
+  .ins-grid div{font-size:11.5px;color:#3a4660}
+  .ins-grid b{color:var(--navy)}
 
-  /* charts */
-  .grid{display:grid;gap:12px;margin-bottom:12px}
-  .g-3{grid-template-columns:1.6fr 1fr 1fr}
-  .g-2{grid-template-columns:1fr 1fr}
-  .card{background:var(--card);border-radius:12px;padding:15px}
-  .card h3{font-size:12.5px;font-weight:600;margin-bottom:11px;display:flex;align-items:center;gap:6px}
+  /* charts grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+  .card h3{font-size:11.5px;font-weight:700;color:var(--navy);margin-bottom:7px}
+  .chart-wrap{position:relative;height:158px}
   canvas{display:block}
 
-  /* brand bars */
-  .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-  .bar-name{width:92px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;color:#414861}
-  .bar-track{flex:1;background:var(--line);border-radius:3px;height:7px;overflow:hidden}
-  .bar-fill{height:100%;border-radius:3px;background:var(--accent)}
-  .bar-val{width:52px;text-align:right;font-size:11px;color:var(--muted);flex-shrink:0}
+  /* AR */
+  .ar h3{font-size:11.5px;font-weight:700;color:var(--navy)}
+  .ar .u{font-size:10px;color:var(--muted);margin:1px 0 7px}
+  .wk{display:flex;gap:8px;margin-bottom:8px}
+  .wk .box{flex:1;border:1px solid var(--line);border-radius:5px;padding:7px 9px}
+  .wk .box .t{font-size:10px;color:var(--muted)}
+  .wk .box .a{font-size:15px;font-weight:700;margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th{background:var(--navy2);color:#fff;text-align:left;font-size:9.5px;font-weight:600;padding:4px 7px;text-transform:uppercase;letter-spacing:.3px}
+  th.num,td.num{text-align:right}
+  td{padding:3.5px 7px;border-bottom:1px solid var(--line)}
+  td.exp{color:var(--teal);font-size:10px}
+  tr.total td{font-weight:700;background:#f2f5fa;border-top:1px solid var(--navy2)}
+  .note{font-size:9.5px;color:var(--muted);margin-top:6px;line-height:1.35;font-style:italic}
+  footer{text-align:center;color:var(--muted);font-size:10px;margin:10px 0 4px}
 
-  /* AR section */
-  .ar{background:var(--card);border-radius:12px;padding:15px 16px;margin-bottom:12px}
-  .ar h3{font-size:12.5px;font-weight:600;margin-bottom:3px}
-  .ar .u{font-size:11px;color:var(--muted);margin-bottom:11px}
-  .ar-cols{display:grid;grid-template-columns:1fr 1.4fr;gap:22px}
-  table{width:100%;border-collapse:collapse;font-size:12px}
-  th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:600;padding:5px 6px;border-bottom:1px solid var(--line)}
-  td{padding:6px 6px;border-bottom:1px solid var(--line)}
-  td.num{text-align:right;font-variant-numeric:tabular-nums}
-  tr.total td{font-weight:700;border-top:2px solid var(--line);border-bottom:none}
-  .note{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.4}
-  .wk{display:flex;gap:10px}
-  .wk .box{flex:1;border:1px solid var(--line);border-radius:9px;padding:10px}
-  .wk .box .t{font-size:11px;color:var(--muted);margin-bottom:4px}
-  .wk .box .a{font-size:18px;font-weight:700}
-  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:14px}
-
-  @media(max-width:860px){
+  @media(max-width:880px){
+    .filters{grid-template-columns:repeat(2,1fr)}
     .kpis{grid-template-columns:repeat(2,1fr)}
-    .g-3,.g-2{grid-template-columns:1fr}
-    .ins-grid,.ar-cols{grid-template-columns:1fr}
+    .grid{grid-template-columns:1fr}
+    .ins-grid{grid-template-columns:1fr}
   }
 </style>
 </head>
 <body>
 <h2 class="sr-only">Company Sales Dashboard — bộ lọc động cập nhật toàn bộ biểu đồ</h2>
 
-<div class="top">
-  <div>
-    <h1>Company Sales Dashboard</h1>
-    <div class="sub">Tổng quan doanh thu toàn công ty — bộ lọc cập nhật mọi biểu đồ · Đơn vị: tỷ ₫</div>
-  </div>
-  <div class="filters">
-    <div class="fld"><label>Year</label><select id="fYear"></select></div>
-    <div class="fld"><label>Team</label><select id="fTeam"></select></div>
-    <div class="fld"><label>Category</label><select id="fCat"></select></div>
-    <div class="fld"><label>Customer type</label><select id="fCtype"></select></div>
-    <div class="fld"><label>Brand</label><select id="fBrand"></select></div>
-    <button class="reset" id="reset">Reset</button>
-  </div>
+<div class="head">
+  <h1>COMPANY SALES DASHBOARD</h1>
+  <div class="sub">Company-wide revenue overview — filters update all charts</div>
+</div>
+
+<div class="filters">
+  <div class="fld"><label>Year</label><select id="fYear"></select></div>
+  <div class="fld"><label>Team</label><select id="fTeam"></select></div>
+  <div class="fld"><label>Category</label><select id="fCat"></select></div>
+  <div class="fld"><label>Customer type</label><select id="fCtype"></select></div>
+  <div class="fld"><label>Brand</label><select id="fBrand"></select></div>
+  <button class="reset" id="reset">Reset</button>
 </div>
 
 <div class="kpis" id="kpis"></div>
 
 <div class="insights">
-  <div class="h">💡 Quick insights for leadership — tự động cập nhật theo bộ lọc</div>
+  <div class="h">💡 Quick insights for leadership — auto-updates with filters</div>
   <div class="ins-grid" id="insights"></div>
 </div>
 
-<div class="grid g-3">
-  <div class="card"><h3>📈 Doanh thu theo tháng</h3><canvas id="cMonth" height="170"></canvas></div>
-  <div class="card"><h3>🏢 Theo Team</h3><canvas id="cTeam" height="170"></canvas></div>
-  <div class="card"><h3>🧩 Theo Category</h3><canvas id="cCat" height="170"></canvas></div>
-</div>
+<div class="sec">📊 DETAILED ANALYSIS — Time · Team · Brand · Customer · Receivables</div>
 
-<div class="grid g-2">
-  <div class="card"><h3>📊 Xu hướng theo năm <span style="font-weight:400;color:var(--muted);font-size:11px">(bỏ qua lọc Year)</span></h3><canvas id="cYear" height="150"></canvas></div>
-  <div class="card"><h3>🏷️ Top 10 thương hiệu</h3><div id="brands"></div></div>
-</div>
+<div class="grid">
+  <div class="card"><h3>Revenue by Year (bn ₫)</h3><div class="chart-wrap"><canvas id="cYear"></canvas></div></div>
+  <div class="card"><h3>Revenue by Month (bn ₫)</h3><div class="chart-wrap"><canvas id="cMonth"></canvas></div></div>
+  <div class="card"><h3>Revenue Mix by Team</h3><div class="chart-wrap"><canvas id="cTeam"></canvas></div></div>
+  <div class="card"><h3>Top 10 Customers by Revenue (bn ₫)</h3><div class="chart-wrap"><canvas id="cCust"></canvas></div></div>
+  <div class="card"><h3>Top 10 Brands by Revenue (bn ₫)</h3><div class="chart-wrap"><canvas id="cBrand"></canvas></div></div>
 
-<div class="ar">
-  <h3>💰 AR Collection & New Contract Deposits</h3>
-  <div class="u">Đơn vị: tỷ ₫ · nguồn: sheet AR Weekly (nhãn tĩnh)</div>
-  <div class="ar-cols">
-    <div>
-      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px">① WEEKLY AR COLLECTION</div>
-      <div class="wk">
-        <div class="box"><div class="t">✅ Tuần trước · 22–27/06 (đã thu)</div><div class="a" style="color:var(--green)">5.5 bn</div></div>
-        <div class="box"><div class="t">🎯 Tuần tới · 29/06–04/07 (dự kiến)</div><div class="a" style="color:var(--accent)">4.5 bn</div></div>
-      </div>
+  <div class="card ar">
+    <h3>💰 AR Collection & New Deposit Contracts</h3>
+    <div class="u">Unit: VND billion · source: AR Weekly sheet</div>
+    <div style="font-size:10px;font-weight:700;color:var(--navy2);margin-bottom:5px">① WEEKLY AR COLLECTION</div>
+    <div class="wk">
+      <div class="box"><div class="t">✅ Last week · 22–27/06 (collected)</div><div class="a" style="color:#16a34a">5.5 bn</div></div>
+      <div class="box"><div class="t">🎯 Next week · 29/06–04/07 (expected)</div><div class="a" style="color:var(--navy2)">4.5 bn</div></div>
     </div>
-    <div>
-      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px">② NEW CONTRACT DEPOSITS — BY CUSTOMER</div>
-      <table>
-        <thead><tr><th>Khách hàng / Hợp đồng</th><th class="num">Đặt cọc</th><th>Dự kiến</th></tr></thead>
-        <tbody>
-          <tr><td>Jollibee (hợp đồng mới)</td><td class="num">8.6 bn</td><td>Cuối tháng 6</td></tr>
-          <tr><td>Lotteria (8 máy kem)</td><td class="num">0.9 bn</td><td>Đầu T7</td></tr>
-          <tr><td>Texas Chicken (giai đoạn 2)</td><td class="num">1.0 bn</td><td>Ước tính T7</td></tr>
-          <tr><td>Vlotus</td><td class="num">1.4 bn</td><td>26-06-26</td></tr>
-          <tr><td>TPC (giai đoạn 2)</td><td class="num">1.3 bn</td><td>Đầu T7</td></tr>
-          <tr><td>Shake Shack (giai đoạn 2)</td><td class="num">0.7 bn</td><td>Đầu T7</td></tr>
-          <tr><td>Lotteria (5 máy còn lại, 20%)</td><td class="num">0.3 bn</td><td>30-07-26</td></tr>
-          <tr class="total"><td>TỔNG ĐẶT CỌC</td><td class="num">14.2 bn</td><td></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div style="font-size:10px;font-weight:700;color:var(--navy2);margin-bottom:4px">② NEW CONTRACT DEPOSITS — BY CUSTOMER</div>
+    <table>
+      <thead><tr><th>Customer / Contract</th><th class="num">Deposit</th><th>Expected</th></tr></thead>
+      <tbody>
+        <tr><td>Jollibee (new contract)</td><td class="num">8.6 bn</td><td class="exp">End of June</td></tr>
+        <tr><td>Lotteria (8 ice-cream machines)</td><td class="num">0.9 bn</td><td class="exp">Early Jul</td></tr>
+        <tr><td>Texas Chicken (phase 2)</td><td class="num">1.0 bn</td><td class="exp">Estimate Jul</td></tr>
+        <tr><td>Vlotus</td><td class="num">1.4 bn</td><td class="exp">26-06-26</td></tr>
+        <tr><td>TPC (phase 2)</td><td class="num">1.3 bn</td><td class="exp">Early Jul</td></tr>
+        <tr><td>Shake Shack (phase 2)</td><td class="num">0.7 bn</td><td class="exp">Early Jul</td></tr>
+        <tr><td>Lotteria (5 remaining, 20%)</td><td class="num">0.3 bn</td><td class="exp">30-07-26</td></tr>
+        <tr class="total"><td>TOTAL DEPOSIT</td><td class="num">14.2 bn</td><td></td></tr>
+      </tbody>
+    </table>
+    <div class="note">Deposit amounts & dates linked from AR Weekly (New Contract & deposit block). Customer names are static labels.</div>
   </div>
-  <div class="note">Ghi chú: số tiền & ngày đặt cọc liên kết từ AR Weekly (khối New Contract & deposit). Tên khách hàng là nhãn tĩnh.</div>
 </div>
 
-<footer>Nguồn: Sales Update Jun 2026.xlsb · 136.842 dòng giao dịch được tổng hợp · Dashboard tương tác</footer>
+<footer>Source: Sales Update Jun 2026.xlsb · 136,842 transaction rows aggregated · interactive dashboard</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="data.js"></script>
+<script src="cust.js"></script>
 <script>
-const C = window.CUBE;
-const ACCENT='#4f46e5';
-const PALETTE=['#4f46e5','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316'];
-const MN=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-
-// row indices: [year,month,team,brand,cat,ctype,rev,qty,profit]
+const C=window.CUBE, CU=window.CUST;
+const NAVY='#1f3864', NAVY2='#2e5496', TEAL='#2f7d8c';
+const PIE=['#1f3864','#2e5496','#4472c4','#8faadc','#2f7d8c','#5b9bd5','#70ad47','#c0504d','#a6a6a6'];
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const R={Y:0,M:1,T:2,B:3,C:4,CT:5,REV:6,QTY:7,PRF:8};
+const U={Y:0,CU:1,T:2,CT:3,REV:4,INV:5};
 
-const fmtBn = v => (v/1e9).toFixed(1);
-const fmtBnFull = v => (v/1e9).toFixed(2)+' bn';
-const fmtInt = v => Math.round(v).toLocaleString('en-US');
+const bn=v=>(v/1e9).toFixed(1);
+const bn2=v=>(v/1e9).toFixed(2);
+const int=v=>Math.round(v).toLocaleString('en-US');
 
-// ---- build filter dropdowns ----
-function fill(sel, items, allLabel, def){
-  const s=document.getElementById(sel);
-  s.innerHTML='';
-  const o0=document.createElement('option');o0.value='__ALL__';o0.textContent=allLabel;s.appendChild(o0);
-  items.forEach((it,i)=>{const o=document.createElement('option');o.value=i;o.textContent=it;s.appendChild(o);});
-  if(def!==undefined) s.value=def;
-}
-function fillYears(){
-  const s=document.getElementById('fYear');s.innerHTML='';
-  const o0=document.createElement('option');o0.value='__ALL__';o0.textContent='(All years)';s.appendChild(o0);
-  C.years.forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;s.appendChild(o);});
-  s.value=String(C.years[C.years.length-1]); // default latest year
-}
-fillYears();
-fill('fTeam',C.teams,'(All teams)');
-fill('fCat',C.cats,'(All categories)');
-fill('fCtype',C.ctypes,'(All cust. types)');
-// brands sorted by total rev desc for usability
-const brandTot=C.brands.map((b,i)=>({i,t:0}));
-C.rows.forEach(r=>brandTot[r[R.B]].t+=r[R.REV]);
-brandTot.sort((a,b)=>b.t-a.t);
+// dropdowns
+function fill(id,items,all){const s=document.getElementById(id);s.innerHTML='';
+  const o=document.createElement('option');o.value='__ALL__';o.textContent=all;s.appendChild(o);
+  items.forEach((it,i)=>{const op=document.createElement('option');op.value=i;op.textContent=it;s.appendChild(op);});}
+(function(){const s=document.getElementById('fYear');s.innerHTML='';
+  const o=document.createElement('option');o.value='__ALL__';o.textContent='(All)';s.appendChild(o);
+  C.years.forEach(y=>{const op=document.createElement('option');op.value=y;op.textContent=y;s.appendChild(op);});
+  s.value=String(C.years[C.years.length-1]);})();
+fill('fTeam',C.teams,'(All)');
+fill('fCat',C.cats,'(All)');
+fill('fCtype',C.ctypes,'(All)');
+const bt=C.brands.map((b,i)=>({i,t:0}));C.rows.forEach(r=>bt[r[R.B]].t+=r[R.REV]);bt.sort((a,b)=>b.t-a.t);
 (function(){const s=document.getElementById('fBrand');s.innerHTML='';
-  const o0=document.createElement('option');o0.value='__ALL__';o0.textContent='(All brands)';s.appendChild(o0);
-  brandTot.forEach(o=>{const op=document.createElement('option');op.value=o.i;op.textContent=C.brands[o.i];s.appendChild(op);});})();
+  const o=document.createElement('option');o.value='__ALL__';o.textContent='(All)';s.appendChild(o);
+  bt.forEach(x=>{const op=document.createElement('option');op.value=x.i;op.textContent=C.brands[x.i];s.appendChild(op);});})();
 
-// ---- current filter state ----
-function F(){
-  const yv=document.getElementById('fYear').value;
-  return {
-    year: yv==='__ALL__'?null:parseInt(yv),
-    team: val('fTeam'), cat: val('fCat'), ctype: val('fCtype'), brand: val('fBrand')
-  };
-}
+// map measure-cube team index -> name -> cust-cube team index (different ordering)
+const teamName2CU={};CU.teams.forEach((t,i)=>teamName2CU[t]=i);
+const ctypeName2CU={};CU.ctypes.forEach((t,i)=>ctypeName2CU[t]=i);
+
 function val(id){const v=document.getElementById(id).value;return v==='__ALL__'?null:parseInt(v);}
-
+function F(){const y=document.getElementById('fYear').value;
+  return{year:y==='__ALL__'?null:parseInt(y),team:val('fTeam'),cat:val('fCat'),ctype:val('fCtype'),brand:val('fBrand')};}
 function match(r,f,ignoreYear){
-  if(!ignoreYear && f.year!==null && r[R.Y]!==f.year) return false;
-  if(f.team!==null && r[R.T]!==f.team) return false;
-  if(f.cat!==null && r[R.C]!==f.cat) return false;
-  if(f.ctype!==null && r[R.CT]!==f.ctype) return false;
-  if(f.brand!==null && r[R.B]!==f.brand) return false;
-  return true;
-}
+  if(!ignoreYear&&f.year!==null&&r[R.Y]!==f.year)return false;
+  if(f.team!==null&&r[R.T]!==f.team)return false;
+  if(f.cat!==null&&r[R.C]!==f.cat)return false;
+  if(f.ctype!==null&&r[R.CT]!==f.ctype)return false;
+  if(f.brand!==null&&r[R.B]!==f.brand)return false;
+  return true;}
+// customer cube filter (year/team/ctype only)
+function matchCU(r,f){
+  if(f.year!==null&&r[U.Y]!==f.year)return false;
+  if(f.team!==null){const ti=teamName2CU[C.teams[f.team]];if(r[U.T]!==ti)return false;}
+  if(f.ctype!==null){const ci=ctypeName2CU[C.ctypes[f.ctype]];if(r[U.CT]!==ci)return false;}
+  return true;}
 
-// chart instances
-let chMonth,chTeam,chCat,chYear;
-
+let chYear,chMonth,chTeam,chCust,chBrand;
 function render(){
   const f=F();
   const rows=C.rows.filter(r=>match(r,f,false));
+  let rev=0,qty=0,prf=0;rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];prf+=r[R.PRF];});
+  const margin=rev?prf/rev*100:0;
+
+  // customer cube
+  const cuRows=CU.rows.filter(r=>matchCU(r,f));
+  const custAgg={};let invoices=0;const seenCust=new Set();
+  cuRows.forEach(r=>{custAgg[r[U.CU]]=(custAgg[r[U.CU]]||0)+r[U.REV];invoices+=r[U.INV];seenCust.add(r[U.CU]);});
+  const customers=seenCust.size;
+  const cuRevTot=Object.values(custAgg).reduce((a,b)=>a+b,0);
+  const avgCust=customers?cuRevTot/customers:0;
 
   // KPIs
-  let rev=0,qty=0,prf=0;
-  rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];prf+=r[R.PRF];});
-  const margin = rev? (prf/rev*100):0;
-  const avgPrice = qty? rev/qty:0;
   document.getElementById('kpis').innerHTML=[
-    ['Total revenue (₫)', fmtBn(rev)+' bn', rows.length.toLocaleString()+' dòng'],
-    ['Total quantity', fmtInt(qty), 'số lượng bán'],
-    ['Gross profit (₫)', fmtBn(prf)+' bn', ''],
-    ['Profit margin', margin.toFixed(1)+'%', ''],
-    ['Avg price / unit (₫)', fmtInt(avgPrice), '']
-  ].map(k=>`<div class="kpi"><div class="lab">${k[0]}</div><div class="val">${k[1]}</div><div class="dlt">${k[2]}</div></div>`).join('');
-
-  // by month (selected year, or all years summed)
-  const mAgg=new Array(12).fill(0);
-  rows.forEach(r=>{if(r[R.M]>=1&&r[R.M]<=12)mAgg[r[R.M]-1]+=r[R.REV];});
-  drawMonth(mAgg);
-
-  // by team
-  const tAgg={};
-  rows.forEach(r=>{tAgg[r[R.T]]=(tAgg[r[R.T]]||0)+r[R.REV];});
-  drawTeam(tAgg);
-
-  // by category
-  const cAgg={};
-  rows.forEach(r=>{cAgg[r[R.C]]=(cAgg[r[R.C]]||0)+r[R.REV];});
-  drawCat(cAgg);
-
-  // by brand top10
-  const bAgg={};
-  rows.forEach(r=>{bAgg[r[R.B]]=(bAgg[r[R.B]]||0)+r[R.REV];});
-  drawBrands(bAgg);
+    ['TOTAL REVENUE (₫)',bn(rev)+' bn'],
+    ['TOTAL QUANTITY',int(qty)],
+    ['CUSTOMERS',int(customers)],
+    ['INVOICES',int(invoices)],
+    ['AVG REV/CUST (₫)',(avgCust/1e6).toFixed(0)+' M']
+  ].map(k=>`<div class="kpi"><div class="val">${k[1]}</div><div class="lab">${k[0]}</div></div>`).join('');
 
   // by year (ignore year filter)
-  const yRows=C.rows.filter(r=>match(r,f,true));
-  const yAgg={};
-  yRows.forEach(r=>{yAgg[r[R.Y]]=(yAgg[r[R.Y]]||0)+r[R.REV];});
-  drawYear(yAgg);
+  const yRows=C.rows.filter(r=>match(r,f,true));const yAgg={};yRows.forEach(r=>yAgg[r[R.Y]]=(yAgg[r[R.Y]]||0)+r[R.REV]);
+  const ys=Object.keys(yAgg).map(Number).sort();
+  drawLine('cYear',ys.map(String),ys.map(y=>+bn2(yAgg[y])),NAVY2,(c=>chYear),v=>chYear=v);
+
+  // by month
+  const mAgg=new Array(12).fill(0);rows.forEach(r=>{if(r[R.M]>=1)mAgg[r[R.M]-1]+=r[R.REV];});
+  const pk=maxIdx(mAgg);
+  drawBar('cMonth',MN,mAgg.map(v=>+bn2(v)),mAgg.map((v,i)=>i===pk?NAVY:'#9db8e0'),(c=>chMonth),v=>chMonth=v);
+
+  // team pie
+  const tAgg={};rows.forEach(r=>tAgg[r[R.T]]=(tAgg[r[R.T]]||0)+r[R.REV]);
+  const te=Object.entries(tAgg).sort((a,b)=>b[1]-a[1]);
+  drawPie('cTeam',te.map(e=>C.teams[e[0]]),te.map(e=>+bn2(e[1])),(c=>chTeam),v=>chTeam=v,rev);
+
+  // top customers
+  const ce=Object.entries(custAgg).sort((a,b)=>b[1]-a[1]).slice(0,10).reverse();
+  drawHBar('cCust',ce.map(e=>CU.custs[e[0]]),ce.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
+
+  // top brands
+  const bAgg={};rows.forEach(r=>bAgg[r[R.B]]=(bAgg[r[R.B]]||0)+r[R.REV]);
+  const be=Object.entries(bAgg).sort((a,b)=>b[1]-a[1]).slice(0,10).reverse();
+  drawHBar('cBrand',be.map(e=>C.brands[e[0]]),be.map(e=>+bn2(e[1])),(c=>chBrand),v=>chBrand=v);
 
   // insights
-  drawInsights(rows,rev,prf,margin,tAgg,bAgg,cAgg,yAgg,f);
+  drawInsights(f,rows,rev,prf,margin,tAgg,bAgg,custAgg,yAgg,mAgg,customers,avgCust);
 }
 
-function drawMonth(m){
-  const data={labels:MN,datasets:[{data:m.map(v=>+(v/1e9).toFixed(2)),backgroundColor:m.map((v,i)=>i===maxIdx(m)?ACCENT:'#c7cafc'),borderRadius:5}]};
-  if(chMonth){chMonth.data=data;chMonth.update();return;}
-  chMonth=new Chart(cMonth,{type:'bar',data,options:baseBar()});
-}
-function drawTeam(agg){
-  const ent=Object.entries(agg).sort((a,b)=>b[1]-a[1]);
-  const data={labels:ent.map(e=>C.teams[e[0]]),datasets:[{data:ent.map(e=>+(e[1]/1e9).toFixed(2)),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]};
-  if(chTeam){chTeam.data=data;chTeam.update();return;}
-  chTeam=new Chart(cTeam,{type:'doughnut',data,options:baseDonut()});
-}
-function drawCat(agg){
-  const ent=Object.entries(agg).sort((a,b)=>b[1]-a[1]);
-  const data={labels:ent.map(e=>C.cats[e[0]]),datasets:[{data:ent.map(e=>+(e[1]/1e9).toFixed(2)),backgroundColor:PALETTE,borderWidth:2,borderColor:'#fff'}]};
-  if(chCat){chCat.data=data;chCat.update();return;}
-  chCat=new Chart(cCat,{type:'doughnut',data,options:baseDonut()});
-}
-function drawYear(agg){
-  const ys=Object.keys(agg).map(Number).sort();
-  const data={labels:ys.map(String),datasets:[{data:ys.map(y=>+(agg[y]/1e9).toFixed(2)),borderColor:ACCENT,backgroundColor:'#4f46e522',fill:true,tension:.3,pointRadius:3,borderWidth:2}]};
-  if(chYear){chYear.data=data;chYear.update();return;}
-  chYear=new Chart(cYear,{type:'line',data,options:baseBar()});
-}
-function drawBrands(agg){
-  const ent=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const max=ent.length?ent[0][1]:1;
-  document.getElementById('brands').innerHTML=ent.map(e=>{
-    const name=C.brands[e[0]],v=e[1];
-    return `<div class="bar-row"><span class="bar-name" title="${name}">${name}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${(v/max*100).toFixed(1)}%"></div></div>
-      <span class="bar-val">${fmtBn(v)} bn</span></div>`;
-  }).join('') || '<div style="color:var(--muted);font-size:12px">Không có dữ liệu</div>';
-}
-
-function drawInsights(rows,rev,prf,margin,tAgg,bAgg,cAgg,yAgg,f){
-  const topTeam=Object.entries(tAgg).sort((a,b)=>b[1]-a[1])[0];
-  const topBrand=Object.entries(bAgg).sort((a,b)=>b[1]-a[1])[0];
-  const topCat=Object.entries(cAgg).sort((a,b)=>b[1]-a[1])[0];
-  // peak month
-  const mAgg=new Array(12).fill(0);rows.forEach(r=>{if(r[R.M]>=1)mAgg[r[R.M]-1]+=r[R.REV];});
-  const pk=maxIdx(mAgg); const lo=minIdxNonZero(mAgg);
-  // YoY: compare selected year vs prev year on same months present (only if a year selected)
-  let yoy='—';
-  if(f.year!==null){
-    const cur=yAggForYear(f,f.year), prev=yAggForYear(f,f.year-1);
-    if(prev>0){const g=((cur-prev)/prev*100);yoy=(g>=0?'▲ +':'▼ ')+g.toFixed(1)+'%  —  '+fmtBn(cur)+' bn vs '+fmtBn(prev)+' bn';}
-  }
+function drawInsights(f,rows,rev,prf,margin,tAgg,bAgg,custAgg,yAgg,mAgg,customers,avgCust){
   const tot=rev||1;
+  const tT=Object.entries(tAgg).sort((a,b)=>b[1]-a[1])[0];
+  const tB=Object.entries(bAgg).sort((a,b)=>b[1]-a[1])[0];
+  const tC=Object.entries(custAgg).sort((a,b)=>b[1]-a[1])[0];
+  const cuTot=Object.values(custAgg).reduce((a,b)=>a+b,0)||1;
+  const pk=maxIdx(mAgg),lo=minNZ(mAgg);
+  let yoy='—';
+  if(f.year!==null){const cur=yAgg[f.year]||0,prev=yAgg[f.year-1]||0;
+    if(prev>0){const g=(cur-prev)/prev*100;yoy=(g>=0?'▲ +':'▼ ')+g.toFixed(1)+'% — '+bn(cur)+' bn vs '+bn(prev)+' bn';}}
   const I=[
-    f.year!==null?`▲ YoY growth: <b>${yoy}</b>`:`📅 Đang xem: <b>tất cả các năm</b>`,
-    topTeam?`🏢 Top team: <b>${C.teams[topTeam[0]]}</b> — ${fmtBn(topTeam[1])} bn (${(topTeam[1]/tot*100).toFixed(0)}%)`:'',
-    topBrand?`🏷️ Top brand: <b>${C.brands[topBrand[0]]}</b> — ${fmtBn(topBrand[1])} bn (${(topBrand[1]/tot*100).toFixed(0)}%)`:'',
-    topCat?`🧩 Top category: <b>${C.cats[topCat[0]]}</b> — ${fmtBn(topCat[1])} bn`:'',
-    mAgg.some(v=>v>0)?`📅 Peak: <b>${MN[pk]} (${fmtBn(mAgg[pk])} bn)</b> · thấp nhất ${MN[lo]} (${fmtBn(mAgg[lo])} bn)`:'',
-    `💰 Gross margin: <b>${margin.toFixed(1)}%</b> · profit ${fmtBn(prf)} bn`
+    f.year!==null?`▲ YoY growth: <b>${yoy}</b>`:`📅 Viewing: <b>all years</b>`,
+    tT?`🏢 Top team: <b>${C.teams[tT[0]]}</b> — ${bn(tT[1])} bn (${(tT[1]/tot*100).toFixed(0)}%)`:'',
+    tC?`👥 Largest customer: <b>${CU.custs[tC[0]]}</b> — ${bn(tC[1])} bn (${(tC[1]/cuTot*100).toFixed(0)}%)`:'',
+    tB?`🏷️ Top brand: <b>${C.brands[tB[0]]}</b> — ${bn(tB[1])} bn (${(tB[1]/tot*100).toFixed(0)}%)`:'',
+    mAgg.some(v=>v>0)?`📅 Peak month: <b>${MN[pk]} (${bn(mAgg[pk])} bn)</b> · lowest ${MN[lo]} (${bn(mAgg[lo])} bn)`:'',
+    `💰 Gross margin: <b>${margin.toFixed(1)}%</b> · ${int(customers)} customers · avg ${(avgCust/1e6).toFixed(0)} M/cust`
   ].filter(Boolean);
   document.getElementById('insights').innerHTML=I.map(x=>`<div>${x}</div>`).join('');
 }
-function yAggForYear(f,year){let s=0;C.rows.forEach(r=>{if(r[R.Y]===year&&match(r,f,true))s+=r[R.REV];});return s;}
+
+// chart helpers
+function drawLine(id,labels,data,color,get,set){const c=get();
+  const d={labels,datasets:[{data,borderColor:color,backgroundColor:color+'22',fill:true,tension:.3,pointRadius:3,pointBackgroundColor:color,borderWidth:2}]};
+  if(c){c.data=d;c.update();return;}set(new Chart(document.getElementById(id),{type:'line',data:d,options:optY()}));}
+function drawBar(id,labels,data,colors,get,set){const c=get();
+  const d={labels,datasets:[{data,backgroundColor:colors,borderRadius:3}]};
+  if(c){c.data=d;c.update();return;}set(new Chart(document.getElementById(id),{type:'bar',data:d,options:optY()}));}
+function drawHBar(id,labels,data,get,set){const c=get();
+  const d={labels,datasets:[{data,backgroundColor:NAVY2,borderRadius:3}]};
+  if(c){c.data=d;c.update();return;}set(new Chart(document.getElementById(id),{type:'bar',data:d,options:optX()}));}
+function drawPie(id,labels,data,get,set,tot){const c=get();
+  const d={labels,datasets:[{data,backgroundColor:PIE,borderWidth:1.5,borderColor:'#fff'}]};
+  if(c){c.data=d;c.update();return;}set(new Chart(document.getElementById(id),{type:'pie',data:d,options:optPie()}));}
+
+function optY(){return{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' bn'}}},
+  scales:{y:{grid:{color:'#eef1f5'},ticks:{font:{size:9},callback:v=>v}},x:{grid:{display:false},ticks:{font:{size:9}}}}};}
+function optX(){return{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x.toFixed(2)+' bn'}}},
+  scales:{x:{grid:{color:'#eef1f5'},ticks:{font:{size:9}}},y:{grid:{display:false},ticks:{font:{size:9.5}}}}};}
+function optPie(){return{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10,padding:4}},
+  tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+': '+c.parsed.toFixed(1)+' bn ('+(c.parsed/t*100).toFixed(1)+'%)';}}}}};}
 
 function maxIdx(a){let m=0;for(let i=1;i<a.length;i++)if(a[i]>a[m])m=i;return m;}
-function minIdxNonZero(a){let m=-1;for(let i=0;i<a.length;i++){if(a[i]>0&&(m<0||a[i]<a[m]))m=i;}return m<0?0:m;}
-
-function baseBar(){return{responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' bn ₫'}}},
-  scales:{y:{grid:{color:'#f0f0f3'},ticks:{callback:v=>v+'b',font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}};}
-function baseDonut(){return{responsive:true,maintainAspectRatio:false,cutout:'60%',
-  plugins:{legend:{position:'right',labels:{font:{size:9.5},boxWidth:11,padding:5}},
-  tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(2)+' bn'}}}};}
+function minNZ(a){let m=-1;for(let i=0;i<a.length;i++)if(a[i]>0&&(m<0||a[i]<a[m]))m=i;return m<0?0:m;}
 
 ['fYear','fTeam','fCat','fCtype','fBrand'].forEach(id=>document.getElementById(id).addEventListener('change',render));
 document.getElementById('reset').addEventListener('click',()=>{
   document.getElementById('fYear').value=String(C.years[C.years.length-1]);
-  ['fTeam','fCat','fCtype','fBrand'].forEach(id=>document.getElementById(id).value='__ALL__');
-  render();
-});
+  ['fTeam','fCat','fCtype','fBrand'].forEach(id=>document.getElementById(id).value='__ALL__');render();});
 render();
 </script>
 </body>
