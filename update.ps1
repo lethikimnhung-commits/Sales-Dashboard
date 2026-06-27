@@ -113,9 +113,10 @@ Write-Host ("  -> cust.js ({0} buckets, {1} customers)" -f $data2.Count, $cuL.Co
 # ---------- Commit & push ----------
 if ($NoPush) { Write-Host "Data rebuilt. Skipped push (-NoPush)." -ForegroundColor Yellow; exit 0 }
 Write-Host "Commit & push to GitHub..." -ForegroundColor Cyan
-git -C $root add data.js cust.js
+$ErrorActionPreference = "Continue"   # git prints progress to stderr; don't treat as fatal
 $stamp = Get-Date -Format "yyyy-MM-dd HH:mm"
-git -C $root commit -m "Update dashboard data ($stamp)" 2>&1 | Out-Null
-git -C $root push origin main 2>&1 | Out-Null
+cmd /c "git -C ""$root"" add data.js cust.js" 2>&1 | Out-Null
+cmd /c "git -C ""$root"" commit -m ""Update dashboard data ($stamp)""" 2>&1 | Out-Null
+cmd /c "git -C ""$root"" push origin main" 2>&1 | Out-Null
 Write-Host "DONE! GitHub Pages will rebuild in ~1 minute." -ForegroundColor Green
 Write-Host "Link: https://lethikimnhung-commits.github.io/Sales-Dashboard/" -ForegroundColor Green
