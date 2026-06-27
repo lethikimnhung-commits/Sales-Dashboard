@@ -138,9 +138,11 @@
 <footer>Source: Sales Update Jun 2026.xlsb · 136,842 transaction rows aggregated · interactive dashboard</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="data.js"></script>
 <script src="cust.js"></script>
 <script>
+Chart.register(ChartDataLabels);
 const C=window.CUBE, CU=window.CUST;
 const NAVY='#1f3864', NAVY2='#2e5496', TEAL='#2f7d8c';
 const PIE=['#1f3864','#2e5496','#4472c4','#8faadc','#2f7d8c','#5b9bd5','#70ad47','#c0504d','#a6a6a6'];
@@ -276,15 +278,22 @@ function drawPie(id,labels,data,get,set,tot){const c=get();
   const d={labels,datasets:[{data,backgroundColor:PIE,borderWidth:1.5,borderColor:'#fff'}]};
   if(c){c.data=d;c.update();return;}set(new Chart(document.getElementById(id),{type:'pie',data:d,options:optPie()}));}
 
-function optY(){return{responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' bn'}}},
+function optY(){return{responsive:true,maintainAspectRatio:false,layout:{padding:{top:16}},
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' bn'}},
+    datalabels:{anchor:'end',align:'top',color:'#1f3864',font:{size:8.5,weight:'600'},
+      display:c=>c.dataset.data[c.dataIndex]>0,formatter:v=>v.toFixed(1)}},
   scales:{y:{grid:{color:'#eef1f5'},ticks:{font:{size:9},callback:v=>v}},x:{grid:{display:false},ticks:{font:{size:9}}}}};}
-function optX(){return{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x.toFixed(2)+' bn'}}},
-  scales:{x:{grid:{color:'#eef1f5'},ticks:{font:{size:9}}},y:{reverse:true,grid:{display:false},ticks:{font:{size:9.5}}}}};}
+function optX(){return{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:30}},
+  plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x.toFixed(2)+' bn'}},
+    datalabels:{anchor:'end',align:'right',color:'#1f3864',font:{size:8.5,weight:'600'},
+      formatter:v=>v.toFixed(1)}},
+  scales:{x:{grid:{color:'#eef1f5'},ticks:{font:{size:9}},grace:'12%'},y:{grid:{display:false},ticks:{font:{size:9.5}}}}};}
 function optPie(){return{responsive:true,maintainAspectRatio:false,
   plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10,padding:4}},
-  tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+': '+c.parsed.toFixed(1)+' bn ('+(c.parsed/t*100).toFixed(1)+'%)';}}}}};}
+    tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+': '+c.parsed.toFixed(1)+' bn ('+(c.parsed/t*100).toFixed(1)+'%)';}}},
+    datalabels:{color:'#fff',font:{size:8.5,weight:'700'},
+      display:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return c.dataset.data[c.dataIndex]/t>=0.05;},
+      formatter:(v,c)=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return (v/t*100).toFixed(0)+'%';}}}};}
 
 function maxIdx(a){let m=0;for(let i=1;i<a.length;i++)if(a[i]>a[m])m=i;return m;}
 function minNZ(a){let m=-1;for(let i=0;i<a.length;i++)if(a[i]>0&&(m<0||a[i]<a[m]))m=i;return m<0?0:m;}
