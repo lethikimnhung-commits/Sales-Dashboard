@@ -1,0 +1,10 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Office temp / source data (không đẩy dữ liệu gốc lên public)
+~$*
+*.xlsb
+*.xlsx
+*.xlsm

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Dashboard — Jun 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f5f6fa;
+    color: #1a1a2e;
+    font-size: 13px;
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h2.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; color: #1a1a2e; }
+  .header .subtitle { font-size: 12px; color: #888; margin-top: 2px; }
+  .badge { background: #e8f5e9; color: #2e7d32; border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+
+  .kpi-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
+  }
+  .kpi-card {
+    background: #fff;
+    border-radius: 10px; padding: 14px 16px;
+    border-left: 4px solid transparent;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .kpi-card.blue { border-color: #2196f3; }
+  .kpi-card.green { border-color: #4caf50; }
+  .kpi-card.orange { border-color: #ff9800; }
+  .kpi-card.red { border-color: #f44336; }
+  .kpi-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: #aaa; margin-top: 3px; }
+  .kpi-card.blue .kpi-value { color: #1565c0; }
+  .kpi-card.green .kpi-value { color: #2e7d32; }
+  .kpi-card.orange .kpi-value { color: #e65100; }
+  .kpi-card.red .kpi-value { color: #c62828; }
+
+  .charts-row {
+    display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;
+  }
+  .charts-row2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;
+  }
+  .chart-card {
+    background: #fff;
+    border-radius: 10px; padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .chart-title {
+    font-size: 13px; font-weight: 600; margin-bottom: 12px; color: #1a1a2e;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .chart-title .icon { font-size: 15px; }
+  canvas { display: block; }
+
+  .aging-bar { margin-bottom: 10px; }
+  .aging-label { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+  .aging-track { background: #eee; border-radius: 4px; height: 10px; overflow: hidden; }
+  .aging-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+
+  .brand-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .brand-name { width: 100px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+  .brand-bar-track { flex: 1; background: #eee; border-radius: 3px; height: 8px; overflow: hidden; }
+  .brand-bar-fill { height: 100%; border-radius: 3px; background: #2196f3; }
+  .brand-val { font-size: 11px; color: #666; width: 55px; text-align: right; flex-shrink: 0; }
+
+  .tab-group { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .tab { padding: 4px 12px; border-radius: 14px; font-size: 11px; cursor: pointer; border: none; background: #eee; color: #666; font-weight: 500; }
+  .tab.active { background: #2196f3; color: #fff; }
+  footer { text-align: center; color: #aaa; font-size: 11px; margin-top: 16px; }
+
+  @media (max-width: 768px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .charts-row, .charts-row2 { grid-template-columns: 1fr; }
+    #brandsContainer { grid-template-columns: 1fr !important; }
+  }
+</style>
+</head>
+<body>
+<h2 class="sr-only">Sales Dashboard tháng 6/2026 - Tổng hợp doanh số, công nợ và thương hiệu</h2>
+
+<div class="header">
+  <div>
+    <h1>Sales Dashboard</h1>
+    <div class="subtitle">Cập nhật đến tháng 6/2026 · Đơn vị: Tỷ VNĐ</div>
+  </div>
+  <span class="badge">YTD Jan–Jun 2026</span>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-card blue">
+    <div class="kpi-label">Tổng doanh số YTD</div>
+    <div class="kpi-value">109.3 B</div>
+    <div class="kpi-sub">vs 206.2B cả năm 2025</div>
+  </div>
+  <div class="kpi-card green">
+    <div class="kpi-label">Doanh số tháng 6</div>
+    <div class="kpi-value">23.3 B</div>
+    <div class="kpi-sub">↑ Cao nhất trong năm</div>
+  </div>
+  <div class="kpi-card orange">
+    <div class="kpi-label">Tổng công nợ AR</div>
+    <div class="kpi-value">25.4 B</div>
+    <div class="kpi-sub">174 khách hàng</div>
+  </div>
+  <div class="kpi-card red">
+    <div class="kpi-label">AR Quá hạn &gt;180 ngày</div>
+    <div class="kpi-value">2.7 B</div>
+    <div class="kpi-sub">20 KH high risk</div>
+  </div>
+</div>
+
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-title"><span class="icon">📈</span> Doanh số theo tháng 2026</div>
+    <canvas id="monthlyChart" height="180"></canvas>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title"><span class="icon">🏢</span> Theo Team (YTD)</div>
+    <canvas id="teamChart" height="180"></canvas>
+  </div>
+</div>
+
+<div class="charts-row2">
+  <div class="chart-card">
+    <div class="chart-title"><span class="icon">📊</span> Doanh số theo năm (Team chính)</div>
+    <div class="tab-group">
+      <button class="tab active" onclick="showYoY('qsr', event)">QSR/KA</button>
+      <button class="tab" onclick="showYoY('han', event)">HAN</button>
+      <button class="tab" onclick="showYoY('gelato', event)">Gelato</button>
+      <button class="tab" onclick="showYoY('coffee', event)">Coffee</button>
+    </div>
+    <canvas id="yoyChart" height="155"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title"><span class="icon">💰</span> AR Aging Breakdown</div>
+    <canvas id="arChart" height="120"></canvas>
+    <div style="margin-top:12px;">
+      <div class="aging-bar">
+        <div class="aging-label"><span>0–30 ngày (đến hạn)</span><span style="color:#4caf50;font-weight:600;">3,430 M</span></div>
+        <div class="aging-track"><div class="aging-fill" style="width:13.5%;background:#4caf50;"></div></div>
+      </div>
+      <div class="aging-bar">
+        <div class="aging-label"><span>30–90 ngày</span><span style="color:#ff9800;font-weight:600;">1,102 M</span></div>
+        <div class="aging-track"><div class="aging-fill" style="width:4.3%;background:#ff9800;"></div></div>
+      </div>
+      <div class="aging-bar">
+        <div class="aging-label"><span>90–180 ngày</span><span style="color:#f44336;font-weight:600;">740 M</span></div>
+        <div class="aging-track"><div class="aging-fill" style="width:2.9%;background:#f44336;"></div></div>
+      </div>
+      <div class="aging-bar">
+        <div class="aging-label"><span>&gt;180 ngày (nguy hiểm)</span><span style="color:#b71c1c;font-weight:700;">2,712 M</span></div>
+        <div class="aging-track"><div class="aging-fill" style="width:10.7%;background:#b71c1c;"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="chart-card">
+  <div class="chart-title"><span class="icon">🏷️</span> Top Thương Hiệu 2026 (YTD)</div>
+  <div id="brandsContainer" style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;"></div>
+</div>
+
+<footer>Nguồn: Sales Update Jun 2026.xlsb · Dashboard tạo tự động</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+const monthlyData = [21.01, 14.64, 13.93, 18.00, 18.38, 23.35];
+new Chart(monthlyCtx, {
+  type: 'bar',
+  data: {
+    labels: ['T1','T2','T3','T4','T5','T6'],
+    datasets: [{ label: 'Doanh số (Tỷ VND)', data: monthlyData,
+      backgroundColor: monthlyData.map((v,i) => i===5 ? '#1565c0' : '#90caf9'), borderRadius: 5 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toFixed(2)+' B VND' }}},
+    scales: { y: { grid: { color: '#f0f0f0' }, ticks: { callback: v => v+'B', font: { size: 11 }}},
+      x: { grid: { display: false }, ticks: { font: { size: 11 }}}}}
+});
+
+const teamCtx = document.getElementById('teamChart').getContext('2d');
+new Chart(teamCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['QSR/KA','HAN','HCM Coffee','HCM Gelato','SERVICE','HCM Hot Kitchen','DAN'],
+    datasets: [{ data: [60.70, 15.38, 9.55, 8.16, 8.30, 2.45, 4.74],
+      backgroundColor: ['#1565c0','#1976d2','#42a5f5','#90caf9','#4caf50','#ff9800','#f44336'],
+      borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels: { font: { size: 10 }, boxWidth: 12, padding: 6 }},
+      tooltip: { callbacks: { label: c => c.label+': '+c.parsed.toFixed(2)+' B ('+((c.parsed/109.3)*100).toFixed(1)+'%)' }}}}
+});
+
+const yoyCtx = document.getElementById('yoyChart').getContext('2d');
+const yoyDatasets = {
+  qsr:    { label:'HCM QSR/KA', data:[69.54,132.50,118.23,118.05,60.70], color:'#1565c0' },
+  han:    { label:'HAN',         data:[17.35, 12.48, 18.66, 30.48, 15.38], color:'#43a047' },
+  gelato: { label:'HCM Gelato',  data:[8.31,  11.48, 12.06, 13.26,  8.16], color:'#fb8c00' },
+  coffee: { label:'HCM Coffee',  data:[19.91, 12.64, 13.87, 15.93,  9.55], color:'#8e24aa' }
+};
+let yoyChart = new Chart(yoyCtx, {
+  type: 'line',
+  data: { labels: ['2022','2023','2024','2025','2026*'],
+    datasets: [{ ...yoyDatasets.qsr, borderColor: yoyDatasets.qsr.color, backgroundColor: yoyDatasets.qsr.color+'22',
+      tension: 0.3, fill: true, pointRadius: 4, borderWidth: 2 }]},
+  options: { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toFixed(2)+' B VND' }}},
+    scales: { y: { grid: { color: '#f0f0f0' }, ticks: { callback: v => v+'B', font: { size: 10 }}},
+      x: { grid: { display: false }, ticks: { font: { size: 11 }}}}}
+});
+function showYoY(key, ev) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  ev.target.classList.add('active');
+  const d = yoyDatasets[key];
+  yoyChart.data.datasets[0].data = d.data;
+  yoyChart.data.datasets[0].label = d.label;
+  yoyChart.data.datasets[0].borderColor = d.color;
+  yoyChart.data.datasets[0].backgroundColor = d.color+'22';
+  yoyChart.update();
+}
+
+const arCtx = document.getElementById('arChart').getContext('2d');
+new Chart(arCtx, {
+  type: 'doughnut',
+  data: { labels: ['0–30 ngày','30–90 ngày','90–180 ngày','>180 ngày','Chưa đến hạn'],
+    datasets: [{ data: [3430, 1102, 740, 2712, 17451],
+      backgroundColor: ['#4caf50','#ff9800','#f44336','#b71c1c','#e0e0e0'], borderWidth: 2, borderColor: '#fff' }]},
+  options: { responsive: true, maintainAspectRatio: false, cutout: '65%',
+    plugins: { legend: { display: false },
+      tooltip: { callbacks: { label: c => c.label+': '+c.parsed.toFixed(0)+' M VND' }}}}
+});
+
+const brands = [
+  ['Hoshizaki',18.88],['Toastmaster',11.39],['Davinci',10.28],['Blendtec',9.28],
+  ['Bunn',7.86],['Bezzera',5.41],['Carpigiani',5.55],['Oatside',4.32],
+  ['Nissei',3.24],['Service',4.60]
+];
+const maxB = Math.max(...brands.map(b=>b[1]));
+const cont = document.getElementById('brandsContainer');
+brands.forEach(([name, val]) => {
+  const div = document.createElement('div');
+  div.className = 'brand-row';
+  div.innerHTML = `<span class="brand-name" title="${name}">${name}</span>
+    <div class="brand-bar-track"><div class="brand-bar-fill" style="width:${(val/maxB*100).toFixed(1)}%"></div></div>
+    <span class="brand-val">${val.toFixed(1)} B</span>`;
+  cont.appendChild(div);
+});
+</script>
+</body>
+</html>
