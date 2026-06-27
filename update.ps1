@@ -12,13 +12,20 @@
     -NoPush                      rebuild data only, do not commit/push
 #>
 param(
-  [string]$Excel = "C:\Users\mgr-q\OneDrive\2026\Sales Update\Sales Update Jun 2026.xlsb",
+  [string]$Excel = "",
   [switch]$NoPush
 )
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
+# Auto-detect newest "Sales Update *.xlsb" in the parent folder if not specified
+if (-not $Excel) {
+  $parent = Split-Path $root -Parent
+  $found = Get-ChildItem -Path $parent -Filter "Sales Update*.xlsb" -File -ErrorAction SilentlyContinue |
+           Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  if ($found) { $Excel = $found.FullName }
+}
 Write-Host "Reading Excel: $Excel" -ForegroundColor Cyan
-if (-not (Test-Path $Excel)) { Write-Host "Excel file NOT found. Use: ./update.ps1 -Excel 'D:\...\file.xlsb'" -ForegroundColor Red; exit 1 }
+if (-not $Excel -or -not (Test-Path $Excel)) { Write-Host "Excel file NOT found in parent folder. Use: ./update.ps1 -Excel 'D:\...\file.xlsb'" -ForegroundColor Red; exit 1 }
 
 $app = New-Object -ComObject Excel.Application
 $app.Visible = $false; $app.DisplayAlerts = $false
