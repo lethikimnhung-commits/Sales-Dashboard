@@ -50,7 +50,7 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
   .card h3{font-size:11.5px;font-weight:700;color:var(--navy);margin-bottom:7px}
   .chart-wrap{position:relative;height:158px}
-  .chart-wrap.tall{height:215px}
+  .chart-wrap.tall{height:300px}
   canvas{display:block}
 
   /* AR */
@@ -233,7 +233,8 @@ function render(){
 
   // top customers
   const ce=Object.entries(custAgg).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  drawHBar('cCust',ce.map(e=>CU.custs[e[0]]),ce.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
+  const trunc=s=>s.length>22?s.slice(0,21)+'…':s;
+  drawHBar('cCust',ce.map(e=>trunc(CU.custs[e[0]])),ce.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
 
   // top brands
   const bAgg={};rows.forEach(r=>bAgg[r[R.B]]=(bAgg[r[R.B]]||0)+r[R.REV]);
