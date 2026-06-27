@@ -112,27 +112,15 @@
 
   <div class="card ar">
     <h3>💰 AR Collection & New Deposit Contracts</h3>
-    <div class="u">Unit: VND billion · source: AR Weekly sheet</div>
+    <div class="u" id="arUnit">Unit: VND billion · source: AR Weekly sheet</div>
     <div style="font-size:10px;font-weight:700;color:var(--navy2);margin-bottom:5px">① WEEKLY AR COLLECTION</div>
-    <div class="wk">
-      <div class="box"><div class="t">✅ Last week · 22–27/06 (collected)</div><div class="a" style="color:#16a34a">5.5 bn</div></div>
-      <div class="box"><div class="t">🎯 Next week · 29/06–04/07 (expected)</div><div class="a" style="color:var(--navy2)">4.5 bn</div></div>
-    </div>
+    <div class="wk" id="arWeekly"></div>
     <div style="font-size:10px;font-weight:700;color:var(--navy2);margin-bottom:4px">② NEW CONTRACT DEPOSITS — BY CUSTOMER</div>
     <table>
       <thead><tr><th>Customer / Contract</th><th class="num">Deposit</th><th>Expected</th></tr></thead>
-      <tbody>
-        <tr><td>Jollibee (new contract)</td><td class="num">8.6 bn</td><td class="exp">End of June</td></tr>
-        <tr><td>Lotteria (8 ice-cream machines)</td><td class="num">0.9 bn</td><td class="exp">Early Jul</td></tr>
-        <tr><td>Texas Chicken (phase 2)</td><td class="num">1.0 bn</td><td class="exp">Estimate Jul</td></tr>
-        <tr><td>Vlotus</td><td class="num">1.4 bn</td><td class="exp">26-06-26</td></tr>
-        <tr><td>TPC (phase 2)</td><td class="num">1.3 bn</td><td class="exp">Early Jul</td></tr>
-        <tr><td>Shake Shack (phase 2)</td><td class="num">0.7 bn</td><td class="exp">Early Jul</td></tr>
-        <tr><td>Lotteria (5 remaining, 20%)</td><td class="num">0.3 bn</td><td class="exp">30-07-26</td></tr>
-        <tr class="total"><td>TOTAL DEPOSIT</td><td class="num">14.2 bn</td><td></td></tr>
-      </tbody>
+      <tbody id="arBody"></tbody>
     </table>
-    <div class="note">Deposit amounts & dates linked from AR Weekly (New Contract & deposit block). Customer names are static labels.</div>
+    <div class="note">Deposit amounts & dates auto-read from the Dashboard Visual AR block (linked to AR Weekly).</div>
   </div>
 </div>
 
@@ -142,6 +130,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="data.js"></script>
 <script src="cust.js"></script>
+<script src="ar.js"></script>
 <script>
 Chart.register(ChartDataLabels);
 const C=window.CUBE, CU=window.CUST;
@@ -302,6 +291,18 @@ function optPie(){return{responsive:true,maintainAspectRatio:false,cutout:'52%',
 
 function maxIdx(a){let m=0;for(let i=1;i<a.length;i++)if(a[i]>a[m])m=i;return m;}
 function minNZ(a){let m=-1;for(let i=0;i<a.length;i++)if(a[i]>0&&(m<0||a[i]<a[m]))m=i;return m<0?0:m;}
+
+// ---- AR block (static snapshot from Excel, rebuilt by update.ps1) ----
+function renderAR(){
+  if(!window.AR) return;
+  if(AR.unit) document.getElementById('arUnit').textContent=AR.unit;
+  const wkColors=['#16a34a','#2e5496'];
+  document.getElementById('arWeekly').innerHTML=(AR.weekly||[]).map((w,i)=>
+    `<div class="box"><div class="t">${w.label||''}</div><div class="a" style="color:${wkColors[i]||'#2e5496'}">${w.amount||''}</div></div>`).join('');
+  const rows=(AR.deposits||[]).map(d=>`<tr><td>${d.cust||''}</td><td class="num">${d.dep||''}</td><td class="exp">${d.exp||''}</td></tr>`).join('');
+  document.getElementById('arBody').innerHTML=rows+`<tr class="total"><td>TOTAL DEPOSIT</td><td class="num">${AR.total||''}</td><td></td></tr>`;
+}
+renderAR();
 
 ['fYear','fTeam','fCat','fCtype','fBrand'].forEach(id=>document.getElementById(id).addEventListener('change',render));
 document.getElementById('reset').addEventListener('click',()=>{

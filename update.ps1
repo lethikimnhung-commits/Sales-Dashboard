@@ -33,6 +33,25 @@ $cat=$ws.Range("V2:V$n").Value2; $year=$ws.Range("X2:X$n").Value2
 $mon=$ws.Range("Y2:Y$n").Value2; $ctype=$ws.Range("Z2:Z$n").Value2
 $prof=$ws.Range("AC2:AC$n").Value2
 $inv=$ws.Range("A2:A$n").Value2; $short=$ws.Range("T2:T$n").Value2; $name=$ws.Range("F2:F$n").Value2
+
+# ---------- AR block from "Dashboard Visual" sheet (cols F/I/K) ----------
+Write-Host "Reading AR block from Dashboard Visual..." -ForegroundColor Cyan
+$dv = $wb.Sheets["Dashboard Visual"]
+$arUnit = [string]$dv.Cells(47,6).Text
+$weekly = @(
+  [ordered]@{ label=[string]$dv.Cells(50,6).Text; amount=[string]$dv.Cells(50,9).Text },
+  [ordered]@{ label=[string]$dv.Cells(51,6).Text; amount=[string]$dv.Cells(51,9).Text }
+)
+$deposits = @()
+$arTotal = ''
+for($r=54; $r -le 75; $r++){
+  $lab=[string]$dv.Cells($r,6).Text
+  if(-not $lab.Trim()){ continue }
+  if($lab -match 'TOTAL'){ $arTotal=[string]$dv.Cells($r,9).Text; break }
+  $deposits += [ordered]@{ cust=$lab; dep=[string]$dv.Cells($r,9).Text; exp=[string]$dv.Cells($r,11).Text }
+}
+$arObj = [ordered]@{ unit=$arUnit; weekly=$weekly; deposits=$deposits; total=$arTotal }
+
 $wb.Close($false); $app.Quit()
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($app) | Out-Null
 
@@ -110,12 +129,17 @@ $json2 = $obj2 | ConvertTo-Json -Depth 5 -Compress
 "window.CUST = $json2;" | Out-File "$root\cust.js" -Encoding utf8
 Write-Host ("  -> cust.js ({0} buckets, {1} customers)" -f $data2.Count, $cuL.Count) -ForegroundColor Green
 
+# ---------- AR file ----------
+$json3 = $arObj | ConvertTo-Json -Depth 5 -Compress
+"window.AR = $json3;" | Out-File "$root\ar.js" -Encoding utf8
+Write-Host ("  -> ar.js ({0} deposit rows)" -f $deposits.Count) -ForegroundColor Green
+
 # ---------- Commit & push ----------
 if ($NoPush) { Write-Host "Data rebuilt. Skipped push (-NoPush)." -ForegroundColor Yellow; exit 0 }
 Write-Host "Commit & push to GitHub..." -ForegroundColor Cyan
 $ErrorActionPreference = "Continue"   # git prints progress to stderr; don't treat as fatal
 $stamp = Get-Date -Format "yyyy-MM-dd HH:mm"
-cmd /c "git -C ""$root"" add data.js cust.js" 2>&1 | Out-Null
+cmd /c "git -C ""$root"" add data.js cust.js ar.js" 2>&1 | Out-Null
 cmd /c "git -C ""$root"" commit -m ""Update dashboard data ($stamp)""" 2>&1 | Out-Null
 cmd /c "git -C ""$root"" push origin main" 2>&1 | Out-Null
 Write-Host "DONE! GitHub Pages will rebuild in ~1 minute." -ForegroundColor Green
