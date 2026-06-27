@@ -229,12 +229,12 @@ function render(){
   drawPie('cTeam',te.map(e=>C.teams[e[0]]),te.map(e=>+bn2(e[1])),(c=>chTeam),v=>chTeam=v,rev);
 
   // top customers
-  const ce=Object.entries(custAgg).sort((a,b)=>b[1]-a[1]).slice(0,10).reverse();
+  const ce=Object.entries(custAgg).sort((a,b)=>b[1]-a[1]).slice(0,10);
   drawHBar('cCust',ce.map(e=>CU.custs[e[0]]),ce.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
 
   // top brands
   const bAgg={};rows.forEach(r=>bAgg[r[R.B]]=(bAgg[r[R.B]]||0)+r[R.REV]);
-  const be=Object.entries(bAgg).sort((a,b)=>b[1]-a[1]).slice(0,10).reverse();
+  const be=Object.entries(bAgg).sort((a,b)=>b[1]-a[1]).slice(0,10);
   drawHBar('cBrand',be.map(e=>C.brands[e[0]]),be.map(e=>+bn2(e[1])),(c=>chBrand),v=>chBrand=v);
 
   // insights
@@ -281,7 +281,7 @@ function optY(){return{responsive:true,maintainAspectRatio:false,
   scales:{y:{grid:{color:'#eef1f5'},ticks:{font:{size:9},callback:v=>v}},x:{grid:{display:false},ticks:{font:{size:9}}}}};}
 function optX(){return{indexAxis:'y',responsive:true,maintainAspectRatio:false,
   plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x.toFixed(2)+' bn'}}},
-  scales:{x:{grid:{color:'#eef1f5'},ticks:{font:{size:9}}},y:{grid:{display:false},ticks:{font:{size:9.5}}}}};}
+  scales:{x:{grid:{color:'#eef1f5'},ticks:{font:{size:9}}},y:{reverse:true,grid:{display:false},ticks:{font:{size:9.5}}}}};}
 function optPie(){return{responsive:true,maintainAspectRatio:false,
   plugins:{legend:{position:'right',labels:{font:{size:9},boxWidth:10,padding:4}},
   tooltip:{callbacks:{label:c=>{const t=c.dataset.data.reduce((a,b)=>a+b,0);return c.label+': '+c.parsed.toFixed(1)+' bn ('+(c.parsed/t*100).toFixed(1)+'%)';}}}}};}
