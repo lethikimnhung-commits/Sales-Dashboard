@@ -134,7 +134,7 @@
 <script src="bcrev.js"></script>
 <script>
 Chart.register(ChartDataLabels);
-const C=window.CUBE, CU=window.CUST, BC=window.BCREV;
+const C=window.CUBE, CU=window.CUST, BC=window.BCREV||{brands:[],custs:[],rows:[]};
 const NAVY='#1f3864', NAVY2='#2e5496', TEAL='#2f7d8c';
 const PIE=['#1f3864','#2e5496','#4472c4','#8faadc','#2f7d8c','#5b9bd5','#70ad47','#c0504d','#a6a6a6'];
 const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -206,26 +206,11 @@ function render(){
   let rev=0,qty=0,prf=0;rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];prf+=r[R.PRF];});
   const margin=rev?prf/rev*100:0;
 
-  // customer cube (base: year/team/ctype)
+  // customer cube (year/team/ctype filters)
   const cuRows=CU.rows.filter(r=>matchCU(r,f));
-  const custAggBase={};let invoices=0;const seenCust=new Set();
-  cuRows.forEach(r=>{custAggBase[r[U.CU]]=(custAggBase[r[U.CU]]||0)+r[U.REV];invoices+=r[U.INV];seenCust.add(r[U.CU]);});
-
-  // when brand filter active: replace revenue with brand-specific revenue from BCREV
-  let custAgg=custAggBase;
-  if(f.brand!==null){
-    const brandMap=custRevByBrand(f); // {custName -> rev}
-    if(brandMap){
-      custAgg={};
-      // only keep customers that appear in both cuRows AND brandMap
-      seenCust.forEach(ci=>{
-        const cn=CU.custs[ci];
-        if(brandMap[cn]!==undefined) custAgg[ci]=brandMap[cn];
-      });
-    }
-  }
-
-  const customers=Object.keys(custAgg).length;
+  const custAgg={};let invoices=0;const seenCust=new Set();
+  cuRows.forEach(r=>{custAgg[r[U.CU]]=(custAgg[r[U.CU]]||0)+r[U.REV];invoices+=r[U.INV];seenCust.add(r[U.CU]);});
+  const customers=seenCust.size;
   const cuRevTot=Object.values(custAgg).reduce((a,b)=>a+b,0);
   const avgCust=customers?cuRevTot/customers:0;
 
@@ -254,9 +239,16 @@ function render(){
   drawPie('cTeam',te.map(e=>C.teams[e[0]]),te.map(e=>+bn2(e[1])),(c=>chTeam),v=>chTeam=v,rev);
 
   // top customers
-  const ce=Object.entries(custAgg).sort((a,b)=>b[1]-a[1]).slice(0,10);
   const trunc=s=>s.length>22?s.slice(0,21)+'…':s;
-  drawHBar('cCust',ce.map(e=>trunc(CU.custs[e[0]])),ce.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
+  if(f.brand!==null){
+    // use BCREV cube for brand-filtered customer revenue
+    const brandMap=custRevByBrand(f);
+    const top10=Object.entries(brandMap||{}).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    drawHBar('cCust',top10.map(e=>trunc(e[0])),top10.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
+  } else {
+    const ce=Object.entries(custAgg).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    drawHBar('cCust',ce.map(e=>trunc(CU.custs[e[0]])),ce.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
+  }
 
   // top brands
   const bAgg={};rows.forEach(r=>bAgg[r[R.B]]=(bAgg[r[R.B]]||0)+r[R.REV]);
