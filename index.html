@@ -240,15 +240,20 @@ function render(){
 
   // top customers
   const trunc=s=>s.length>22?s.slice(0,21)+'…':s;
+  let custLabels,custData;
   if(f.brand!==null){
-    // use BCREV cube for brand-filtered customer revenue
     const brandMap=custRevByBrand(f);
+    console.log('[DEBUG] brand='+f.brand+' brandName='+C.brands[f.brand]+' bcIdx='+bcBrandIdx[C.brands[f.brand]]+' mapKeys='+(brandMap?Object.keys(brandMap).length:'null'));
     const top10=Object.entries(brandMap||{}).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    drawHBar('cCust',top10.map(e=>trunc(e[0])),top10.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
+    custLabels=top10.map(e=>trunc(e[0]));
+    custData=top10.map(e=>+bn2(e[1]));
   } else {
     const ce=Object.entries(custAgg).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    drawHBar('cCust',ce.map(e=>trunc(CU.custs[e[0]])),ce.map(e=>+bn2(e[1])),(c=>chCust),v=>chCust=v);
+    custLabels=ce.map(e=>trunc(CU.custs[e[0]]));
+    custData=ce.map(e=>+bn2(e[1]));
   }
+  if(chCust){chCust.destroy();chCust=null;}
+  chCust=new Chart(document.getElementById('cCust'),{type:'bar',data:{labels:custLabels,datasets:[{data:custData,backgroundColor:NAVY2,borderRadius:3}]},options:optX()});
 
   // top brands
   const bAgg={};rows.forEach(r=>bAgg[r[R.B]]=(bAgg[r[R.B]]||0)+r[R.REV]);

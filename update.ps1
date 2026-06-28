@@ -141,12 +141,36 @@ $json3 = $arObj | ConvertTo-Json -Depth 5 -Compress
 "window.AR = $json3;" | Out-File "$root\ar.js" -Encoding utf8
 Write-Host ("  -> ar.js ({0} deposit rows)" -f $deposits.Count) -ForegroundColor Green
 
+# ---------- CUBE 3: brand-customer revenue (enables brand filter on Top Customers) ----------
+Write-Host "Building brand-customer cube..." -ForegroundColor Cyan
+$bcAgg=@{}
+for($i=1;$i -le $rows;$i++){
+  $y=$year[$i,1]; if($null -eq $y){continue}; $y=[int]$y
+  $b=[string]$brand[$i,1]; if(-not $b){$b='Unknown'}
+  $c=[string]$short[$i,1]; if(-not $c -or $c -eq '0'){$c=[string]$name[$i,1]}
+  if(-not $c){continue}
+  $r=$rev[$i,1]; if($null -eq $r){$r=0}; $r=[double]$r
+  $key="$y`t$b`t$c"
+  if($bcAgg.ContainsKey($key)){$bcAgg[$key]+=$r}else{$bcAgg[$key]=$r}
+}
+$bcBrands=@{};$bcBL=@();$bcCusts=@{};$bcCL=@()
+$data4=@()
+foreach($k in $bcAgg.Keys){
+  $f=$k -split "`t"; $y=[int]$f[0]; $b=$f[1]; $c=$f[2]
+  $bi=Idx $bcBrands ([ref]$bcBL) $b; $ci=Idx $bcCusts ([ref]$bcCL) $c
+  $data4+= ,@($y,$bi,$ci,[math]::Round($bcAgg[$k]))
+}
+$obj4=[ordered]@{brands=$bcBL;custs=$bcCL;rows=$data4}
+$json4 = $obj4 | ConvertTo-Json -Depth 5 -Compress
+"window.BCREV = $json4;" | Out-File "$root\bcrev.js" -Encoding utf8
+Write-Host ("  -> bcrev.js ({0} brand-cust buckets)" -f $data4.Count) -ForegroundColor Green
+
 # ---------- Commit & push ----------
 if ($NoPush) { Write-Host "Data rebuilt. Skipped push (-NoPush)." -ForegroundColor Yellow; exit 0 }
 Write-Host "Commit & push to GitHub..." -ForegroundColor Cyan
 $ErrorActionPreference = "Continue"   # git prints progress to stderr; don't treat as fatal
 $stamp = Get-Date -Format "yyyy-MM-dd HH:mm"
-cmd /c "git -C ""$root"" add data.js cust.js ar.js" 2>&1 | Out-Null
+cmd /c "git -C ""$root"" add data.js cust.js ar.js bcrev.js" 2>&1 | Out-Null
 cmd /c "git -C ""$root"" commit -m ""Update dashboard data ($stamp)""" 2>&1 | Out-Null
 cmd /c "git -C ""$root"" push origin main" 2>&1 | Out-Null
 Write-Host "DONE! GitHub Pages will rebuild in ~1 minute." -ForegroundColor Green
