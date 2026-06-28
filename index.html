@@ -131,9 +131,10 @@
 <script src="data.js"></script>
 <script src="cust.js"></script>
 <script src="ar.js"></script>
+<script src="bcrev.js"></script>
 <script>
 Chart.register(ChartDataLabels);
-const C=window.CUBE, CU=window.CUST;
+const C=window.CUBE, CU=window.CUST, BC=window.BCREV;
 const NAVY='#1f3864', NAVY2='#2e5496', TEAL='#2f7d8c';
 const PIE=['#1f3864','#2e5496','#4472c4','#8faadc','#2f7d8c','#5b9bd5','#70ad47','#c0504d','#a6a6a6'];
 const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -174,12 +175,29 @@ function match(r,f,ignoreYear){
   if(f.ctype!==null&&r[R.CT]!==f.ctype)return false;
   if(f.brand!==null&&r[R.B]!==f.brand)return false;
   return true;}
-// customer cube filter (year/team/ctype only)
+// customer cube filter (year/team/ctype only — brand handled via BCREV)
 function matchCU(r,f){
   if(f.year!==null&&r[U.Y]!==f.year)return false;
   if(f.team!==null){const ti=teamName2CU[C.teams[f.team]];if(r[U.T]!==ti)return false;}
   if(f.ctype!==null){const ci=ctypeName2CU[C.ctypes[f.ctype]];if(r[U.CT]!==ci)return false;}
   return true;}
+
+// build brand-filtered customer revenue map from BCREV cube
+const bcBrandIdx={};BC.brands.forEach((b,i)=>bcBrandIdx[b]=i);
+const bcCustIdx={};BC.custs.forEach((c,i)=>bcCustIdx[c]=i);
+function custRevByBrand(f){
+  // returns {custName: rev} for selected brand (+ year filter)
+  const brandName=C.brands[f.brand];
+  const bi=bcBrandIdx[brandName];
+  if(bi===undefined)return null;
+  const map={};
+  BC.rows.forEach(r=>{
+    if(r[1]!==bi)return;
+    if(f.year!==null&&r[0]!==f.year)return;
+    const cn=BC.custs[r[2]];
+    map[cn]=(map[cn]||0)+r[3];
+  });
+  return map;}
 
 let chYear,chMonth,chTeam,chCust,chBrand;
 function render(){
@@ -188,11 +206,26 @@ function render(){
   let rev=0,qty=0,prf=0;rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];prf+=r[R.PRF];});
   const margin=rev?prf/rev*100:0;
 
-  // customer cube
+  // customer cube (base: year/team/ctype)
   const cuRows=CU.rows.filter(r=>matchCU(r,f));
-  const custAgg={};let invoices=0;const seenCust=new Set();
-  cuRows.forEach(r=>{custAgg[r[U.CU]]=(custAgg[r[U.CU]]||0)+r[U.REV];invoices+=r[U.INV];seenCust.add(r[U.CU]);});
-  const customers=seenCust.size;
+  const custAggBase={};let invoices=0;const seenCust=new Set();
+  cuRows.forEach(r=>{custAggBase[r[U.CU]]=(custAggBase[r[U.CU]]||0)+r[U.REV];invoices+=r[U.INV];seenCust.add(r[U.CU]);});
+
+  // when brand filter active: replace revenue with brand-specific revenue from BCREV
+  let custAgg=custAggBase;
+  if(f.brand!==null){
+    const brandMap=custRevByBrand(f); // {custName -> rev}
+    if(brandMap){
+      custAgg={};
+      // only keep customers that appear in both cuRows AND brandMap
+      seenCust.forEach(ci=>{
+        const cn=CU.custs[ci];
+        if(brandMap[cn]!==undefined) custAgg[ci]=brandMap[cn];
+      });
+    }
+  }
+
+  const customers=Object.keys(custAgg).length;
   const cuRevTot=Object.values(custAgg).reduce((a,b)=>a+b,0);
   const avgCust=customers?cuRevTot/customers:0;
 
