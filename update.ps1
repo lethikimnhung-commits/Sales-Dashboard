@@ -20,17 +20,26 @@ $root = $PSScriptRoot
 # Auto-detect newest "Sales Update *.xlsb" in the parent folder if not specified
 if (-not $Excel) {
   $parent = Split-Path $root -Parent
-  $found = Get-ChildItem -Path $parent -Filter "Sales Update*.xlsb" -File -ErrorAction SilentlyContinue |
+  $found = Get-ChildItem -Path $parent -Filter "Sales Update*.xlsb" -File -Recurse -ErrorAction SilentlyContinue |
            Sort-Object LastWriteTime -Descending | Select-Object -First 1
   if ($found) { $Excel = $found.FullName }
 }
 Write-Host "Reading Excel: $Excel" -ForegroundColor Cyan
 if (-not $Excel -or -not (Test-Path $Excel)) { Write-Host "Excel file NOT found in parent folder. Use: ./update.ps1 -Excel 'D:\...\file.xlsb'" -ForegroundColor Red; exit 1 }
 
+# Copy to temp to avoid file-lock when Excel has it open
+$tmpExcel = [System.IO.Path]::GetTempFileName() + ".xlsb"
+Copy-Item $Excel $tmpExcel -Force
 $app = New-Object -ComObject Excel.Application
 $app.Visible = $false; $app.DisplayAlerts = $false
-$wb = $app.Workbooks.Open($Excel)
-$ws = $wb.Sheets["Raw data"]
+$app.AutomationSecurity = 1  # msoAutomationSecurityLow - disable security prompts
+$wb = $app.Workbooks.Open($tmpExcel, 0, $true, [Type]::Missing, "", "", $true)
+Write-Host "Workbook opened: $($wb -ne $null), sheets: $($wb.Sheets.Count)" -ForegroundColor Cyan
+$ws = $null
+for ($si = 1; $si -le $wb.Sheets.Count; $si++) {
+  if ($wb.Sheets.Item($si).Name -eq "Raw data") { $ws = $wb.Sheets.Item($si); break }
+}
+if (-not $ws) { Write-Host "ERROR: Sheet 'Raw data' not found. Available:" -ForegroundColor Red; for ($si=1;$si -le $wb.Sheets.Count;$si++){Write-Host "  $($wb.Sheets.Item($si).Name)"}; exit 1 }
 $n = $ws.UsedRange.Rows.Count
 Write-Host "Total rows: $n" -ForegroundColor Green
 
@@ -61,6 +70,7 @@ $arObj = [ordered]@{ unit=$arUnit; weekly=$weekly; deposits=$deposits; total=$ar
 
 $wb.Close($false); $app.Quit()
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($app) | Out-Null
+Remove-Item $tmpExcel -ErrorAction SilentlyContinue
 
 $rows = $qty.GetLength(0)
 $mmap=@{'January'=1;'February'=2;'March'=3;'April'=4;'May'=5;'June'=6;'July'=7;'August'=8;'September'=9;'October'=10;'November'=11;'December'=12}

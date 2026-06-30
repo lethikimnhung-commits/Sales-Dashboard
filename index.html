@@ -203,8 +203,9 @@ let chYear,chMonth,chTeam,chCust,chBrand;
 function render(){
   const f=F();
   const rows=C.rows.filter(r=>match(r,f,false));
-  let rev=0,qty=0,prf=0;rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];prf+=r[R.PRF];});
-  const margin=rev?prf/rev*100:0;
+  let rev=0,qty=0,prf=0,prfRev=0;
+  rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];if(r[R.PRF]>0&&r[R.PRF]<=r[R.REV]){prf+=r[R.PRF];prfRev+=r[R.REV];}});
+  const margin=prfRev?prf/prfRev*100:0;
 
   // customer cube (year/team/ctype filters)
   const cuRows=CU.rows.filter(r=>matchCU(r,f));
