@@ -175,12 +175,19 @@ $json4 = $obj4 | ConvertTo-Json -Depth 5 -Compress
 "window.BCREV = $json4;" | Out-File "$root\bcrev.js" -Encoding utf8
 Write-Host ("  -> bcrev.js ({0} brand-cust buckets)" -f $data4.Count) -ForegroundColor Green
 
+# ---------- Cache-bust: update ?v= stamp in index.html ----------
+$ver = Get-Date -Format "yyyyMMddHHmm"
+$html = [System.IO.File]::ReadAllText("$root\index.html")
+$html = $html -replace '(data\.js|cust\.js|ar\.js|bcrev\.js)\?v=\d+', "`$1?v=$ver"
+[System.IO.File]::WriteAllText("$root\index.html", $html, [System.Text.Encoding]::UTF8)
+Write-Host "  -> index.html cache-bust ?v=$ver" -ForegroundColor Green
+
 # ---------- Commit & push ----------
 if ($NoPush) { Write-Host "Data rebuilt. Skipped push (-NoPush)." -ForegroundColor Yellow; exit 0 }
 Write-Host "Commit & push to GitHub..." -ForegroundColor Cyan
 $ErrorActionPreference = "Continue"   # git prints progress to stderr; don't treat as fatal
 $stamp = Get-Date -Format "yyyy-MM-dd HH:mm"
-cmd /c "git -C ""$root"" add data.js cust.js ar.js bcrev.js" 2>&1 | Out-Null
+cmd /c "git -C ""$root"" add data.js cust.js ar.js bcrev.js index.html" 2>&1 | Out-Null
 cmd /c "git -C ""$root"" commit -m ""Update dashboard data ($stamp)""" 2>&1 | Out-Null
 cmd /c "git -C ""$root"" push origin main" 2>&1 | Out-Null
 Write-Host "DONE! GitHub Pages will rebuild in ~1 minute." -ForegroundColor Green
