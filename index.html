@@ -203,9 +203,7 @@ let chYear,chMonth,chTeam,chCust,chBrand;
 function render(){
   const f=F();
   const rows=C.rows.filter(r=>match(r,f,false));
-  let rev=0,qty=0,prf=0,prfRev=0;
-  rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];if(r[R.PRF]>0&&r[R.PRF]<=r[R.REV]){prf+=r[R.PRF];prfRev+=r[R.REV];}});
-  const margin=prfRev?prf/prfRev*100:0;
+  let rev=0,qty=0;rows.forEach(r=>{rev+=r[R.REV];qty+=r[R.QTY];});
 
   // customer cube (year/team/ctype filters)
   const cuRows=CU.rows.filter(r=>matchCU(r,f));
@@ -262,10 +260,10 @@ function render(){
   drawHBar('cBrand',be.map(e=>C.brands[e[0]]),be.map(e=>+bn2(e[1])),(c=>chBrand),v=>chBrand=v);
 
   // insights
-  drawInsights(f,rows,rev,prf,margin,tAgg,bAgg,custAgg,yAgg,mAgg,customers,avgCust);
+  drawInsights(f,rows,rev,tAgg,bAgg,custAgg,yAgg,mAgg,customers,avgCust);
 }
 
-function drawInsights(f,rows,rev,prf,margin,tAgg,bAgg,custAgg,yAgg,mAgg,customers,avgCust){
+function drawInsights(f,rows,rev,tAgg,bAgg,custAgg,yAgg,mAgg,customers,avgCust){
   const tot=rev||1;
   const tT=Object.entries(tAgg).sort((a,b)=>b[1]-a[1])[0];
   const tB=Object.entries(bAgg).sort((a,b)=>b[1]-a[1])[0];
@@ -281,7 +279,7 @@ function drawInsights(f,rows,rev,prf,margin,tAgg,bAgg,custAgg,yAgg,mAgg,customer
     tC?`👥 Largest customer: <b>${CU.custs[tC[0]]}</b> — ${bn(tC[1])} bn (${(tC[1]/cuTot*100).toFixed(0)}%)`:'',
     tB?`🏷️ Top brand: <b>${C.brands[tB[0]]}</b> — ${bn(tB[1])} bn (${(tB[1]/tot*100).toFixed(0)}%)`:'',
     mAgg.some(v=>v>0)?`📅 Peak month: <b>${MN[pk]} (${bn(mAgg[pk])} bn)</b> · lowest ${MN[lo]} (${bn(mAgg[lo])} bn)`:'',
-    `💰 Gross margin: <b>${margin.toFixed(1)}%</b> · ${int(customers)} customers · avg ${(avgCust/1e6).toFixed(0)} M/cust`
+    `👥 ${int(customers)} customers · avg rev/cust: <b>${(avgCust/1e6).toFixed(0)} M</b>`
   ].filter(Boolean);
   document.getElementById('insights').innerHTML=I.map(x=>`<div>${x}</div>`).join('');
 }
