@@ -121,17 +121,19 @@
       <tbody id="arBody"></tbody>
     </table>
     <div class="note">Deposit amounts & dates auto-read from the Dashboard Visual AR block (linked to AR Weekly).</div>
+    <div style="font-size:10px;font-weight:700;color:var(--navy2);margin:9px 0 4px">③ MONTHLY AR COLLECTION ACTUALS (bn ₫)</div>
+    <div class="chart-wrap" style="height:130px"><canvas id="cAR"></canvas></div>
   </div>
 </div>
 
-<footer>Source: Sales Update Jul 2026 · 137649 transaction rows aggregated · interactive dashboard</footer>
+<footer>Source: Sales Update Jul 2026 · 137675 transaction rows aggregated · interactive dashboard</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-<script src="data.js?v=202607061615"></script>
-<script src="cust.js?v=202607061615"></script>
-<script src="ar.js?v=202607061615"></script>
-<script src="bcrev.js?v=202607061615"></script>
+<script src="data.js?v=202607071408"></script>
+<script src="cust.js?v=202607071408"></script>
+<script src="ar.js?v=202607071408"></script>
+<script src="bcrev.js?v=202607071408"></script>
 <script>
 Chart.register(ChartDataLabels);
 const C=window.CUBE, CU=window.CUST, BC=window.BCREV||{brands:[],custs:[],rows:[]};
@@ -199,7 +201,7 @@ function custRevByBrand(f){
   });
   return map;}
 
-let chYear,chMonth,chTeam,chCust,chBrand;
+let chYear,chMonth,chTeam,chCust,chBrand,chAR;
 function render(){
   const f=F();
   const rows=C.rows.filter(r=>match(r,f,false));
@@ -336,6 +338,13 @@ function renderAR(){
     `<div class="box"><div class="t">${w.label||''}</div><div class="a" style="color:${wkColors[i]||'#2e5496'}">${w.amount||''}</div></div>`).join('');
   const rows=(AR.deposits||[]).map(d=>`<tr><td>${d.cust||''}</td><td class="num">${d.dep||''}</td><td class="exp">${d.exp||''}</td></tr>`).join('');
   document.getElementById('arBody').innerHTML=rows+`<tr class="total"><td>TOTAL DEPOSIT</td><td class="num">${AR.total||''}</td><td></td></tr>`;
+  // Monthly AR actuals bar chart
+  if(AR.monthly&&AR.monthly.length){
+    const mlabels=AR.monthly.map(m=>m.label);
+    const mdata=AR.monthly.map(m=>+(m.amount).toFixed(2));
+    if(chAR){chAR.destroy();chAR=null;}
+    chAR=new Chart(document.getElementById('cAR'),{type:'bar',data:{labels:mlabels,datasets:[{data:mdata,backgroundColor:TEAL,borderRadius:3}]},options:optY()});
+  }
 }
 renderAR();
 
