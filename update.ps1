@@ -54,19 +54,54 @@ $inv=$ws.Range("A2:A$n").Value2; $short=$ws.Range("T2:T$n").Value2; $name=$ws.Ra
 Write-Host "Reading AR block from Dashboard Visual..." -ForegroundColor Cyan
 $dv = $wb.Sheets["Dashboard Visual"]
 $arUnit = [string]$dv.Cells(47,6).Text
-$weekly = @(
-  [ordered]@{ label=[string]$dv.Cells(50,6).Text; amount=[string]$dv.Cells(50,9).Text },
-  [ordered]@{ label=[string]$dv.Cells(51,6).Text; amount=[string]$dv.Cells(51,9).Text }
-)
+# Read weekly rows dynamically: start at row 50, stop when hitting the deposits section header
+$weekly = @()
+for($r=50; $r -le 70; $r++){
+  $lab=[string]$dv.Cells($r,6).Text
+  if($lab -match 'NEW CONTRACT DEPOSITS'){ break }
+  if(-not $lab.Trim()){ continue }
+  if($lab -match '^Period'){ continue }
+  $weekly += [ordered]@{ label=$lab; amount=[string]$dv.Cells($r,9).Text }
+}
+# Read deposits: scan all rows, use flag to enter deposit section after its header
 $deposits = @()
 $arTotal = ''
-for($r=54; $r -le 75; $r++){
+$inDeposits = $false
+for($r=50; $r -le 85; $r++){
   $lab=[string]$dv.Cells($r,6).Text
   if(-not $lab.Trim()){ continue }
-  if($lab -match 'TOTAL'){ $arTotal=[string]$dv.Cells($r,9).Text; break }
-  $deposits += [ordered]@{ cust=$lab; dep=[string]$dv.Cells($r,9).Text; exp=[string]$dv.Cells($r,11).Text }
+  if($lab -match 'TOTAL DEPOSIT'){ $arTotal=[string]$dv.Cells($r,9).Text; break }
+  if($lab -match 'NEW CONTRACT DEPOSITS'){ $inDeposits = $true; continue }
+  if(-not $inDeposits){ continue }
+  # Skip column header row
+  if($lab -match 'Customer / Contract|CUSTOMER'){ continue }
+  $dep=[string]$dv.Cells($r,9).Text
+  if(-not $dep.Trim()){ continue }
+  $expDate=[string]$dv.Cells($r,10).Text
+  $expStat=[string]$dv.Cells($r,11).Text
+  # Reformat M-D-YYYY (Excel US format) to DD/MM/YYYY
+  if($expDate -match '^(\d+)-(\d+)-(\d+)$'){
+    $expDate = '{0:D2}/{1:D2}/{2}' -f [int]$Matches[2],[int]$Matches[1],[int]$Matches[3]
+  }
+  $exp = if($expDate.Trim() -and $expStat.Trim()){"$expDate - $expStat"} elseif($expDate.Trim()){$expDate} else {$expStat}
+  $deposits += [ordered]@{ cust=$lab; dep=$dep; exp=$exp }
 }
-$arObj = [ordered]@{ unit=$arUnit; weekly=$weekly; deposits=$deposits; total=$arTotal }
+# Read monthly AR actuals (section 3 - rows after deposit TOTAL, look for MONTHLY header)
+$monthly = @()
+$inMonthly = $false
+for($r=60; $r -le 90; $r++){
+  $lab=[string]$dv.Cells($r,6).Text
+  if(-not $lab.Trim()){ continue }
+  if($lab -match 'MONTHLY AR COLLECTION'){ $inMonthly = $true; continue }
+  if(-not $inMonthly){ continue }
+  if($lab -match '^Source|^Month$'){ continue }
+  if($lab -match 'TOTAL'){ break }
+  $amt = $dv.Cells($r,9).Value2
+  if($null -ne $amt -and [double]$amt -gt 0){
+    $monthly += [ordered]@{ label=$lab; amount=[math]::Round([double]$amt,3) }
+  }
+}
+$arObj = [ordered]@{ unit=$arUnit; weekly=$weekly; deposits=$deposits; total=$arTotal; monthly=$monthly }
 
 $wb.Close($false); $app.Quit()
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($app) | Out-Null
@@ -175,12 +210,15 @@ $json4 = $obj4 | ConvertTo-Json -Depth 5 -Compress
 "window.BCREV = $json4;" | Out-File "$root\bcrev.js" -Encoding utf8
 Write-Host ("  -> bcrev.js ({0} brand-cust buckets)" -f $data4.Count) -ForegroundColor Green
 
-# ---------- Cache-bust: update ?v= stamp in index.html ----------
+# ---------- Cache-bust + footer update in index.html ----------
 $ver = Get-Date -Format "yyyyMMddHHmm"
+$excelName = [System.IO.Path]::GetFileNameWithoutExtension($Excel)
 $html = [System.IO.File]::ReadAllText("$root\index.html")
 $html = $html -replace '(data\.js|cust\.js|ar\.js|bcrev\.js)\?v=\d+', "`$1?v=$ver"
+$dot = [char]183
+$html = $html -replace '<footer>.*?</footer>', "<footer>Source: $excelName $dot $rows transaction rows aggregated $dot interactive dashboard</footer>"
 [System.IO.File]::WriteAllText("$root\index.html", $html, [System.Text.Encoding]::UTF8)
-Write-Host "  -> index.html cache-bust ?v=$ver" -ForegroundColor Green
+Write-Host "  -> index.html cache-bust ?v=$ver + footer updated" -ForegroundColor Green
 
 # ---------- Commit & push ----------
 if ($NoPush) { Write-Host "Data rebuilt. Skipped push (-NoPush)." -ForegroundColor Yellow; exit 0 }
