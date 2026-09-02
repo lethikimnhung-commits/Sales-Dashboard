@@ -34,7 +34,16 @@ $app = New-Object -ComObject Excel.Application
 $app.Visible = $false; $app.DisplayAlerts = $false
 $app.AutomationSecurity = 1  # msoAutomationSecurityLow - disable security prompts
 $wb = $app.Workbooks.Open($tmpExcel, 0, $true, [Type]::Missing, "", "", $true)
-Write-Host "Workbook opened: $($wb -ne $null), sheets: $($wb.Sheets.Count)" -ForegroundColor Cyan
+# Big workbooks keep Excel busy after Open() returns; COM calls are rejected until
+# it finishes loading. Poll until the sheet collection answers (up to ~4 minutes).
+$sheetCount = 0
+for ($k = 1; $k -le 120; $k++) {
+  try { $sheetCount = $wb.Sheets.Count } catch { $sheetCount = 0 }
+  if ($sheetCount -gt 0) { break }
+  Start-Sleep -Seconds 2
+}
+Write-Host "Workbook opened: $($wb -ne $null), sheets: $sheetCount" -ForegroundColor Cyan
+if ($sheetCount -eq 0) { Write-Host "ERROR: Excel never finished loading the workbook." -ForegroundColor Red; exit 1 }
 $ws = $null
 for ($si = 1; $si -le $wb.Sheets.Count; $si++) {
   if ($wb.Sheets.Item($si).Name -eq "Raw data") { $ws = $wb.Sheets.Item($si); break }
@@ -52,7 +61,11 @@ $inv=$ws.Range("A2:A$n").Value2; $short=$ws.Range("T2:T$n").Value2; $name=$ws.Ra
 
 # ---------- AR block from "Dashboard Visual" sheet (cols F/I/K) ----------
 Write-Host "Reading AR block from Dashboard Visual..." -ForegroundColor Cyan
-$dv = $wb.Sheets["Dashboard Visual"]
+$dv = $null
+for ($si = 1; $si -le $sheetCount; $si++) {
+  if ($wb.Sheets.Item($si).Name -eq "Dashboard Visual") { $dv = $wb.Sheets.Item($si); break }
+}
+if (-not $dv) { Write-Host "ERROR: Sheet 'Dashboard Visual' not found." -ForegroundColor Red; exit 1 }
 $arUnit = [string]$dv.Cells(47,6).Text
 # Read weekly rows dynamically: start at row 50, stop when hitting the deposits section header
 $weekly = @()
@@ -91,15 +104,23 @@ $monthly = @()
 $inMonthly = $false
 for($r=60; $r -le 90; $r++){
   $lab=[string]$dv.Cells($r,6).Text
-  if(-not $lab.Trim()){ continue }
   if($lab -match 'MONTHLY AR COLLECTION'){ $inMonthly = $true; continue }
   if(-not $inMonthly){ continue }
   if($lab -match '^Source|^Month$'){ continue }
   if($lab -match 'TOTAL'){ break }
   $amt = $dv.Cells($r,9).Value2
-  if($null -ne $amt -and [double]$amt -gt 0){
-    $monthly += [ordered]@{ label=$lab; amount=[math]::Round([double]$amt,3) }
+  if($null -eq $amt -or [double]$amt -le 0){ continue }
+  if(-not $lab.Trim()){
+    # Amount present but the month label cell is blank in the workbook:
+    # continue the sequence from the previous month so the bar is not dropped.
+    if($monthly.Count -gt 0 -and $monthly[$monthly.Count-1].label -match '^([A-Za-z]{3})-(\d{2})$'){
+      $mn=@('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec')
+      $pi=[array]::IndexOf($mn,$Matches[1]); $yy=[int]$Matches[2]
+      if($pi -ge 0){ $ni=($pi+1)%12; if($ni -eq 0){$yy++}; $lab='{0}-{1:D2}' -f $mn[$ni],$yy }
+    }
+    if(-not $lab.Trim()){ continue }
   }
+  $monthly += [ordered]@{ label=$lab; amount=[math]::Round([double]$amt,3) }
 }
 $arObj = [ordered]@{ unit=$arUnit; weekly=$weekly; deposits=$deposits; total=$arTotal; monthly=$monthly }
 
